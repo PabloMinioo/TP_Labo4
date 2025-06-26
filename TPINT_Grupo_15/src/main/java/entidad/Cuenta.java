@@ -1,6 +1,7 @@
 package entidad;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class Cuenta {
     private String numeroCuenta;
@@ -88,4 +89,8 @@ public class Cuenta {
                 ", saldo=" + saldo +
                 '}';
     }
+
+	
+
+
 }

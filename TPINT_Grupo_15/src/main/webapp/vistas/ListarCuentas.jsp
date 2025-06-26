@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+	<%@ page import="java.util.List"%>
+	<%@ page import="entidad.Cuenta"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -119,13 +121,20 @@ tr:hover {
 			</thead>
 			<tbody>
 				<!-- EJEMPLO DE COMO SE VERIA EL LISTADO -->
+				<!-- OBTENEMOS LAS CUENTAS Y LAS LISTAMOS -->
+
+				<%
+				List<Cuenta> listaCuentas = (List<Cuenta>) request.getAttribute("listaCuentas");
+				if (listaCuentas != null && !listaCuentas.isEmpty()) {
+					for (Cuenta cu : listaCuentas) {
+				%>
 				<tr>
-					<td>002</td>
-					<td>42623741</td>
-					<td>13/06/2025</td>
-					<td>Caja de Ahorro</td>
-					<td>0003891271923192</td>
-					<td>$375000</td>
+					<td><%=cu.getNumeroCuenta() %></td>
+					<td><%=cu.getClienteDNI() %></td>
+					<td><%=cu.getFechaCreacion() %></td>
+					<td><%=cu.getTipoCuenta() %></td>
+					<td><%=cu.getCbu() %></td>
+					<td><%=cu.getSaldo() %></td>
 					<td>
 						<div class="acciones-btn">
 								<button type="submit" class="btn-accion btn-modificar">Modificar</button>
@@ -133,7 +142,16 @@ tr:hover {
 						</div>
 					</td>
 				</tr>
-
+				<%
+				}
+				} else {
+				%>
+				<tr>
+					<td colspan="5">No hay cuentas para mostrar.</td>
+				</tr>
+				<%
+				}
+				%>
 			</tbody>
 		</table>
 	</div>

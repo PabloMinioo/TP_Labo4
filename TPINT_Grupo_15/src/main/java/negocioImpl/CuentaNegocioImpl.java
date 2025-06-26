@@ -116,15 +116,10 @@ public class CuentaNegocioImpl implements CuentaNegocio {
         }
     }
     
-    @Override
-    public List<Cuenta> listarCuentas() {
-        try {
-            return cuentaDAO.obtenerTodas();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public List<Cuenta> listarCuentas() throws Exception{
+    	return cuentaDAO.listarCuentas();
     }
+    
     
     @Override
     public List<Cuenta> listarCuentasPorCliente(String clienteDNI) {

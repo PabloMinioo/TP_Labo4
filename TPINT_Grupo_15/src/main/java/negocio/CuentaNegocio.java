@@ -10,7 +10,7 @@ public interface CuentaNegocio {
     boolean modificarCuenta(Cuenta cuenta);
     boolean eliminarCuenta(String numeroCuenta);
     Cuenta buscarCuenta(String numeroCuenta);
-    List<Cuenta> listarCuentas();
+    List<Cuenta> listarCuentas() throws Exception;
     
     // Operaciones específicas de negocio
     List<Cuenta> listarCuentasPorCliente(String clienteDNI);

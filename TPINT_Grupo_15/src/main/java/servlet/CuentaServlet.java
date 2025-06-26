@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import DAO.CuentaDAO;
+import DAOimpl.CuentaDAOImpl;
 import entidad.Cuenta;
 import negocio.CuentaNegocio;
 import negocioImpl.CuentaNegocioImpl;
@@ -19,16 +21,18 @@ import negocioImpl.CuentaNegocioImpl;
 public class CuentaServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
-    private CuentaNegocio CuentaNegocio;
+    
+    private CuentaDAO cuentaDAOImpl = new CuentaDAOImpl();
+    private CuentaNegocio cuentaNegocio = new CuentaNegocioImpl();
     
     public CuentaServlet() {
         super();
-        this.CuentaNegocio = new CuentaNegocioImpl();
+        this.cuentaNegocio = new CuentaNegocioImpl();
     }
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+    	
         String action = request.getParameter("action");
         
         if (action == null) {
@@ -87,14 +91,20 @@ public class CuentaServlet extends HttpServlet {
         }
     }
     
-    private void listarCuentas(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        List<Cuenta> listaCuentas = CuentaNegocio.listarCuentas();
-        request.setAttribute("listaCuentas", listaCuentas);
-        
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/listar.jsp");
-        dispatcher.forward(request, response);
+   private void listarCuentas(HttpServletRequest request, HttpServletResponse response) 
+        throws ServletException, IOException {
+    	try
+        {
+        	List<Cuenta> listaCuentas = cuentaNegocio.listarCuentas();
+        	
+            request.setAttribute("listaCuentas", listaCuentas);
+            
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/vistas/ListarCuentas.jsp");
+            dispatcher.forward(request, response);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     private void mostrarFormularioNuevo(HttpServletRequest request, HttpServletResponse response) 
@@ -108,7 +118,7 @@ public class CuentaServlet extends HttpServlet {
             throws ServletException, IOException {
         
         String numeroCuenta = request.getParameter("numeroCuenta");
-        Cuenta cuenta = CuentaNegocio.buscarCuenta(numeroCuenta);
+        Cuenta cuenta = cuentaNegocio.buscarCuenta(numeroCuenta);
         
         request.setAttribute("cuenta", cuenta);
         RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/editar.jsp");
@@ -129,7 +139,7 @@ public class CuentaServlet extends HttpServlet {
             cuenta.setSaldo(saldoInicial);
             cuenta.setFechaCreacion(LocalDate.now());
             
-            boolean exito = CuentaNegocio.crearCuenta(cuenta);
+            boolean exito = cuentaNegocio.crearCuenta(cuenta);
             
             if (exito) {
                 request.setAttribute("mensaje", "Cuenta creada exitosamente");
@@ -164,7 +174,7 @@ public class CuentaServlet extends HttpServlet {
             cuenta.setCbu(cbu);
             cuenta.setSaldo(saldo);
             
-            boolean exito = CuentaNegocio.modificarCuenta(cuenta);
+            boolean exito = cuentaNegocio.modificarCuenta(cuenta);
             
             if (exito) {
                 request.setAttribute("mensaje", "Cuenta actualizada exitosamente");
@@ -187,7 +197,7 @@ public class CuentaServlet extends HttpServlet {
         
         try {
             String numeroCuenta = request.getParameter("numeroCuenta");
-            boolean exito =CuentaNegocio.eliminarCuenta(numeroCuenta);
+            boolean exito = cuentaNegocio.eliminarCuenta(numeroCuenta);
             
             if (exito) {
                 request.setAttribute("mensaje", "Cuenta eliminada exitosamente");
@@ -209,7 +219,7 @@ public class CuentaServlet extends HttpServlet {
             throws ServletException, IOException {
         
         String numeroCuenta = request.getParameter("numeroCuenta");
-        Cuenta cuenta = CuentaNegocio.buscarCuenta(numeroCuenta);
+        Cuenta cuenta = cuentaNegocio.buscarCuenta(numeroCuenta);
         
         request.setAttribute("cuenta", cuenta);
         RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/ver.jsp");
@@ -220,11 +230,11 @@ public class CuentaServlet extends HttpServlet {
             throws ServletException, IOException {
         
         String clienteDNI = request.getParameter("clienteDNI");
-        List<Cuenta> listaCuentas = CuentaNegocio.listarCuentasPorCliente(clienteDNI);
+        List<Cuenta> listaCuentas = cuentaNegocio.listarCuentasPorCliente(clienteDNI);
         
         request.setAttribute("listaCuentas", listaCuentas);
         request.setAttribute("clienteDNI", clienteDNI);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/listar.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/vistas/ListarCuentas.jsp");
         dispatcher.forward(request, response);
     }
     
@@ -235,7 +245,7 @@ public class CuentaServlet extends HttpServlet {
             String numeroCuenta = request.getParameter("numeroCuenta");
             double monto = Double.parseDouble(request.getParameter("monto"));
             
-            boolean exito = CuentaNegocio.depositarDinero(numeroCuenta, monto);
+            boolean exito = cuentaNegocio.depositarDinero(numeroCuenta, monto);
             
             if (exito) {
                 request.setAttribute("mensaje", "Depósito realizado exitosamente");
@@ -260,7 +270,7 @@ public class CuentaServlet extends HttpServlet {
             String numeroCuenta = request.getParameter("numeroCuenta");
             double monto = Double.parseDouble(request.getParameter("monto"));
             
-            boolean exito = CuentaNegocio.retirarDinero(numeroCuenta, monto);
+            boolean exito = cuentaNegocio.retirarDinero(numeroCuenta, monto);
             
             if (exito) {
                 request.setAttribute("mensaje", "Retiro realizado exitosamente");
@@ -286,7 +296,7 @@ public class CuentaServlet extends HttpServlet {
             String numeroCuentaDestino = request.getParameter("numeroCuentaDestino");
             double monto = Double.parseDouble(request.getParameter("monto"));
             
-            boolean exito = CuentaNegocio.transferirSaldo(numeroCuentaOrigen, numeroCuentaDestino, monto);
+            boolean exito = cuentaNegocio.transferirSaldo(numeroCuentaOrigen, numeroCuentaDestino, monto);
             
             if (exito) {
                 request.setAttribute("mensaje", "Transferencia realizada exitosamente");
@@ -303,4 +313,12 @@ public class CuentaServlet extends HttpServlet {
         
         listarCuentas(request, response);
     }
+
+	public CuentaDAOImpl getCuentaDAOImpl() {
+		return (CuentaDAOImpl) cuentaDAOImpl;
+	}
+
+	public void setCuentaDAOImpl(CuentaDAOImpl cuentaDAOImpl) {
+		this.cuentaDAOImpl = cuentaDAOImpl;
+	}
 }

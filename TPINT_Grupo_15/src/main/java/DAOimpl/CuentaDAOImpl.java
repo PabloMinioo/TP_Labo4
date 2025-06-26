@@ -1,7 +1,9 @@
 package DAOimpl;
 
 
+import DAO.Conexion;
 import DAO.CuentaDAO;
+import entidad.Cliente;
 import entidad.Cuenta;
 import java.sql.*;
 import java.util.ArrayList;
@@ -111,22 +113,26 @@ public class CuentaDAOImpl implements CuentaDAO {
     }
     
     @Override
-    public List<Cuenta> obtenerTodas() {
-        PreparedStatement statement;
-        ResultSet resultSet;
-        List<Cuenta> cuentas = new ArrayList<>();
-        
-        try {
-            statement = conexion.prepareStatement(OBTENER_TODAS);
-            resultSet = statement.executeQuery();
-            
-            while(resultSet.next()) {
-                cuentas.add(mapearCuenta(resultSet));
+    public List<Cuenta> listarCuentas() throws Exception {
+    	List<Cuenta> listaC = new ArrayList<>();
+        String sql = "SELECT * FROM Cuentas";
+        try (Connection conn = Conexion.getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+            	Cuenta cuenta = new Cuenta();
+                cuenta.setNumeroCuenta(rs.getString("NumeroCuenta_Cu"));
+                cuenta.setClienteDNI(rs.getString("ClienteDNI_Cu"));
+                cuenta.setFechaCreacion(rs.getDate("FechaCreacion_Cu").toLocalDate());
+                cuenta.setTipoCuenta(rs.getInt("TipoCuenta_Cu"));
+                cuenta.setCbu(rs.getString("CBU_Cu"));
+                cuenta.setSaldo(rs.getDouble("SALDO_Cu"));
+                
+                listaC.add(cuenta);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return cuentas;
+        return listaC;
+        
     }
     
     @Override

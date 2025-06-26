@@ -10,7 +10,7 @@ public interface CuentaDAO {
     boolean actualizar(Cuenta cuenta);
     boolean eliminar(String numeroCuenta);
     Cuenta obtenerPorId(String numeroCuenta);
-    List<Cuenta> obtenerTodas();
+    List<Cuenta> listarCuentas() throws Exception;
     
     //  Operaciones de consultas 
     List<Cuenta> obtenerPorClienteDNI(String clienteDNI);
