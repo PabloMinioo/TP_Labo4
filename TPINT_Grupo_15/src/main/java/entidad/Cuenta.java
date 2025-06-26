@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class Cuenta {
-    private String numeroCuenta;
+	private int numeroCuenta;
     private String clienteDNI;
     private LocalDate fechaCreacion;
     private int tipoCuenta;
@@ -18,7 +18,7 @@ public class Cuenta {
     }
     
     // Constructor con parametros
-    public Cuenta(String numeroCuenta, String clienteDNI, LocalDate fechaCreacion, 
+    public Cuenta(int numeroCuenta, String clienteDNI, LocalDate fechaCreacion, 
                   int tipoCuenta, String cbu, double saldo) {
         this.numeroCuenta = numeroCuenta;
         this.clienteDNI = clienteDNI;
@@ -29,11 +29,11 @@ public class Cuenta {
     }
     
     // Getters y Setters
-    public String getNumeroCuenta() {
+    public int getNumeroCuenta() {
         return numeroCuenta;
     }
-    
-    public void setNumeroCuenta(String numeroCuenta) {
+
+    public void setNumeroCuenta(int numeroCuenta) {
         this.numeroCuenta = numeroCuenta;
     }
     

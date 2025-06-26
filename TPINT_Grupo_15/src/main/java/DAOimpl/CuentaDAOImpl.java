@@ -13,7 +13,7 @@ public class CuentaDAOImpl implements CuentaDAO {
     
     private static final String INSERTAR = "INSERT INTO Cuentas (NumeroCuenta_Cu, ClienteDNI_Cu, FechaCreacion_Cu, TipoCuenta_Cu, CBU_Cu, SALDO_Cu) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String ACTUALIZAR = "UPDATE Cuentas SET ClienteDNI_Cu = ?, FechaCreacion_Cu = ?, TipoCuenta_Cu = ?, CBU_Cu = ?, SALDO_Cu = ? WHERE NumeroCuenta_Cu = ?";
-    private static final String ELIMINAR = "DELETE FROM Cuentas WHERE NumeroCuenta_Cu = ?";
+    private static final String ELIMINAR = "UPDATE Cuentas SET Estado_Cu = FALSE WHERE NumeroCuenta_Cu = ?";
     private static final String OBTENER_POR_ID = "SELECT * FROM Cuentas WHERE NumeroCuenta_Cu = ?";
     private static final String OBTENER_TODAS = "SELECT * FROM Cuentas ORDER BY NumeroCuenta_Cu";
     private static final String OBTENER_POR_CLIENTE = "SELECT * FROM Cuentas WHERE ClienteDNI_Cu = ?";
@@ -33,7 +33,7 @@ public class CuentaDAOImpl implements CuentaDAO {
         PreparedStatement statement;
         try {
             statement = conexion.prepareStatement(INSERTAR);
-            statement.setString(1, cuenta.getNumeroCuenta());
+            statement.setInt(1, cuenta.getNumeroCuenta());
             statement.setString(2, cuenta.getClienteDNI());
             statement.setDate(3, Date.valueOf(cuenta.getFechaCreacion()));
             statement.setInt(4, cuenta.getTipoCuenta());
@@ -61,7 +61,7 @@ public class CuentaDAOImpl implements CuentaDAO {
             statement.setInt(3, cuenta.getTipoCuenta());
             statement.setString(4, cuenta.getCbu());
             statement.setDouble(5, cuenta.getSaldo());
-            statement.setString(6, cuenta.getNumeroCuenta());
+            statement.setInt(6, cuenta.getNumeroCuenta());
             
             if(statement.executeUpdate() > 0) {
                 conexion.commit();
@@ -75,32 +75,26 @@ public class CuentaDAOImpl implements CuentaDAO {
     }
     
     @Override
-    public boolean eliminar(String numeroCuenta) {
-        PreparedStatement statement;
-        try {
-            statement = conexion.prepareStatement(ELIMINAR);
-            statement.setString(1, numeroCuenta);
-            
-            if(statement.executeUpdate() > 0) {
-                conexion.commit();
-                return true;
-            }
+    public boolean eliminar(int numeroCuenta) {
+    	try (PreparedStatement statement = conexion.prepareStatement(ELIMINAR)) {
+            statement.setInt(1, numeroCuenta);
+            int filasAfectadas = statement.executeUpdate();
+            return filasAfectadas > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
         return false;
     }
     
     @Override
-    public Cuenta obtenerPorId(String numeroCuenta) {
+    public Cuenta obtenerPorId(int numeroCuenta) {
         PreparedStatement statement;
         ResultSet resultSet;
         Cuenta cuenta = null;
         
         try {
             statement = conexion.prepareStatement(OBTENER_POR_ID);
-            statement.setString(1, numeroCuenta);
+            statement.setInt(1, numeroCuenta);
             resultSet = statement.executeQuery();
             
             if(resultSet.next()) {
@@ -115,13 +109,13 @@ public class CuentaDAOImpl implements CuentaDAO {
     @Override
     public List<Cuenta> listarCuentas() throws Exception {
     	List<Cuenta> listaC = new ArrayList<>();
-        String sql = "SELECT * FROM Cuentas";
+        String sql = "SELECT * FROM Cuentas WHERE Estado_Cu = TRUE";
         try (Connection conn = Conexion.getConexion();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
             	Cuenta cuenta = new Cuenta();
-                cuenta.setNumeroCuenta(rs.getString("NumeroCuenta_Cu"));
+                cuenta.setNumeroCuenta(rs.getInt("NumeroCuenta_Cu"));
                 cuenta.setClienteDNI(rs.getString("ClienteDNI_Cu"));
                 cuenta.setFechaCreacion(rs.getDate("FechaCreacion_Cu").toLocalDate());
                 cuenta.setTipoCuenta(rs.getInt("TipoCuenta_Cu"));
@@ -156,13 +150,13 @@ public class CuentaDAOImpl implements CuentaDAO {
     }
     
     @Override
-    public boolean existeNumeroCuenta(String numeroCuenta) {
+    public boolean existeNumeroCuenta(int numeroCuenta) {
         PreparedStatement statement;
         ResultSet resultSet;
         
         try {
             statement = conexion.prepareStatement(EXISTE_NUMERO_CUENTA);
-            statement.setString(1, numeroCuenta);
+            statement.setInt(1, numeroCuenta);
             resultSet = statement.executeQuery();
             
             if(resultSet.next()) {
@@ -234,7 +228,7 @@ public class CuentaDAOImpl implements CuentaDAO {
     
     private Cuenta mapearCuenta(ResultSet resultSet) throws SQLException {
         Cuenta cuenta = new Cuenta();
-        cuenta.setNumeroCuenta(resultSet.getString("NumeroCuenta_Cu"));
+        cuenta.setNumeroCuenta(resultSet.getInt("NumeroCuenta_Cu"));
         cuenta.setClienteDNI(resultSet.getString("ClienteDNI_Cu"));
         cuenta.setFechaCreacion(resultSet.getDate("FechaCreacion_Cu").toLocalDate());
         cuenta.setTipoCuenta(resultSet.getInt("TipoCuenta_Cu"));

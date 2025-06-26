@@ -85,6 +85,9 @@ public class CuentaServlet extends HttpServlet {
             case "transferir":
                 transferirDinero(request, response);
                 break;
+            case "eliminar":
+                eliminarCuenta(request, response);
+                break;
             default:
                 listarCuentas(request, response);
                 break;
@@ -117,8 +120,8 @@ public class CuentaServlet extends HttpServlet {
     private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        String numeroCuenta = request.getParameter("numeroCuenta");
-        Cuenta cuenta = cuentaNegocio.buscarCuenta(numeroCuenta);
+    	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
+    	Cuenta cuenta = cuentaNegocio.buscarCuenta(numeroCuenta);
         
         request.setAttribute("cuenta", cuenta);
         RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/editar.jsp");
@@ -161,7 +164,7 @@ public class CuentaServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            String numeroCuenta = request.getParameter("numeroCuenta");
+            int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
             String clienteDNI = request.getParameter("clienteDNI");
             int tipoCuenta = Integer.parseInt(request.getParameter("tipoCuenta"));
             String cbu = request.getParameter("cbu");
@@ -196,8 +199,8 @@ public class CuentaServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            String numeroCuenta = request.getParameter("numeroCuenta");
-            boolean exito = cuentaNegocio.eliminarCuenta(numeroCuenta);
+        	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
+        	boolean exito = cuentaNegocio.eliminarCuenta(numeroCuenta);
             
             if (exito) {
                 request.setAttribute("mensaje", "Cuenta eliminada exitosamente");
@@ -218,8 +221,8 @@ public class CuentaServlet extends HttpServlet {
     private void verCuenta(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        String numeroCuenta = request.getParameter("numeroCuenta");
-        Cuenta cuenta = cuentaNegocio.buscarCuenta(numeroCuenta);
+    	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
+    	Cuenta cuenta = cuentaNegocio.buscarCuenta(numeroCuenta);
         
         request.setAttribute("cuenta", cuenta);
         RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/ver.jsp");
@@ -242,10 +245,10 @@ public class CuentaServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            String numeroCuenta = request.getParameter("numeroCuenta");
-            double monto = Double.parseDouble(request.getParameter("monto"));
-            
-            boolean exito = cuentaNegocio.depositarDinero(numeroCuenta, monto);
+        	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
+        	double monto = Double.parseDouble(request.getParameter("monto"));
+
+        	boolean exito = cuentaNegocio.depositarDinero(numeroCuenta, monto);
             
             if (exito) {
                 request.setAttribute("mensaje", "Depósito realizado exitosamente");
@@ -267,10 +270,10 @@ public class CuentaServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            String numeroCuenta = request.getParameter("numeroCuenta");
-            double monto = Double.parseDouble(request.getParameter("monto"));
-            
-            boolean exito = cuentaNegocio.retirarDinero(numeroCuenta, monto);
+        	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
+        	double monto = Double.parseDouble(request.getParameter("monto"));
+
+        	boolean exito = cuentaNegocio.retirarDinero(numeroCuenta, monto);
             
             if (exito) {
                 request.setAttribute("mensaje", "Retiro realizado exitosamente");
@@ -292,11 +295,11 @@ public class CuentaServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            String numeroCuentaOrigen = request.getParameter("numeroCuentaOrigen");
-            String numeroCuentaDestino = request.getParameter("numeroCuentaDestino");
-            double monto = Double.parseDouble(request.getParameter("monto"));
-            
-            boolean exito = cuentaNegocio.transferirSaldo(numeroCuentaOrigen, numeroCuentaDestino, monto);
+        	int numeroCuentaOrigen = Integer.parseInt(request.getParameter("numeroCuentaOrigen"));
+        	int numeroCuentaDestino = Integer.parseInt(request.getParameter("numeroCuentaDestino"));
+        	double monto = Double.parseDouble(request.getParameter("monto"));
+
+        	boolean exito = cuentaNegocio.transferirSaldo(numeroCuentaOrigen, numeroCuentaDestino, monto);
             
             if (exito) {
                 request.setAttribute("mensaje", "Transferencia realizada exitosamente");

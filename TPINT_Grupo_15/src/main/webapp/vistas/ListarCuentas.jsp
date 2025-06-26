@@ -137,8 +137,13 @@ tr:hover {
 					<td><%=cu.getSaldo() %></td>
 					<td>
 						<div class="acciones-btn">
+								<form action="CuentaServlet" method="post" style="display:inline;" 
+          						onsubmit="return confirm('¿Está seguro que desea eliminar esta cuenta?');">
+      							<input type="hidden" name="action" value="eliminar" />
+     							 <input type="hidden" name="numeroCuenta" value="<%= cu.getNumeroCuenta() %>" />
+      							<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
+    							</form>
 								<button type="submit" class="btn-accion btn-modificar">Modificar</button>
-								<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
 						</div>
 					</td>
 				</tr>

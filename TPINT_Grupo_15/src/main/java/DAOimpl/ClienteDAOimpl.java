@@ -40,7 +40,7 @@ public class ClienteDAOimpl implements ClienteDAO {
 
     @Override
     public boolean eliminarCliente(String dni) throws Exception {
-        String sql = "DELETE FROM Clientes WHERE DNI_Cl = ?";
+        String sql = "UPDATE Clientes SET Estado_Cl = FALSE WHERE DNI_Cl = ?";
         try (Connection conn = Conexion.getConexion();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dni);
@@ -104,7 +104,7 @@ public class ClienteDAOimpl implements ClienteDAO {
     @Override
     public List<Cliente> listarClientes() throws Exception {
         List<Cliente> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Clientes";
+        String sql = "SELECT * FROM Clientes WHERE Estado_Cl = TRUE";
         try (Connection conn = Conexion.getConexion();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

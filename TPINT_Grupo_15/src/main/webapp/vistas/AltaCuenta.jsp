@@ -53,7 +53,7 @@
 	<jsp:include page="/WEB-INF/MasterAdmin.jsp" />
 	<div class="contenedor">
 		
-		<form action="AltaCuentaServlet" method="post">
+		<form action="ClienteServlet" method="post">
 			<h2>Alta de Cuenta Bancaria</h2><br>
 		    <label>Cliente: </label><input type="text" name="cliente"><br>
 		    <label>Fecha de Creación: </label><input type="date" name="fechaCreacion"><br>

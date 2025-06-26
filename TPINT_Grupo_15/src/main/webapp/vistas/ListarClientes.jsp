@@ -156,7 +156,11 @@ tr:hover {
 					<td>
 						<div class="acciones-btn">
 							<button type="submit" class="btn-accion btn-modificar">Modificar</button>
-							<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
+							<form method="post" action="ClienteServlet" onsubmit="return confirm('¿Está seguro que desea eliminar este cliente?');">
+    							<input type="hidden" name="accion" value="eliminar">
+    							<input type="hidden" name="dni" value="<%=cli.getDni()%>">
+    						<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
+							</form>
 						</div>
 					</td>
 				</tr>

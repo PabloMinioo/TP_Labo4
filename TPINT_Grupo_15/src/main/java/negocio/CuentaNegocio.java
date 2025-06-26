@@ -8,20 +8,20 @@ public interface CuentaNegocio {
     // Operaciones ABML con validaciones de negocio
     boolean crearCuenta(Cuenta cuenta);
     boolean modificarCuenta(Cuenta cuenta);
-    boolean eliminarCuenta(String numeroCuenta);
-    Cuenta buscarCuenta(String numeroCuenta);
+    boolean eliminarCuenta(int numeroCuenta);
+    Cuenta buscarCuenta(int numeroCuenta);
     List<Cuenta> listarCuentas() throws Exception;
     
     // Operaciones específicas de negocio
     List<Cuenta> listarCuentasPorCliente(String clienteDNI);
-    boolean transferirSaldo(String numeroCuentaOrigen, String numeroCuentaDestino, double monto);
-    boolean depositarDinero(String numeroCuenta, double monto);
-    boolean retirarDinero(String numeroCuenta, double monto);
-    double consultarSaldo(String numeroCuenta);
+    boolean transferirSaldo(int numeroCuentaOrigen, int numeroCuentaDestino, double monto);
+    boolean depositarDinero(int numeroCuenta, double monto);
+    boolean retirarDinero(int numeroCuenta, double monto);
+    double consultarSaldo(int numeroCuenta);
     
     // Validaciones
     boolean validarDatosCuenta(Cuenta cuenta);
-    String generarNumeroCuenta();
+    int generarNumeroCuenta();
     String generarCBU();
-    boolean puedeEliminarCuenta(String numeroCuenta);
+    boolean puedeEliminarCuenta(int numeroCuenta);
 }

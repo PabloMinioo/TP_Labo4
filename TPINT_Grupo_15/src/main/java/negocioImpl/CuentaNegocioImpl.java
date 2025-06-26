@@ -26,7 +26,7 @@ public class CuentaNegocioImpl implements CuentaNegocio {
             }
             
             // Generar número de cuenta único si no está asignado
-            if (cuenta.getNumeroCuenta() == null || cuenta.getNumeroCuenta().isEmpty()) {
+            if (cuenta.getNumeroCuenta() == 0) {
                 cuenta.setNumeroCuenta(generarNumeroCuenta());
             }
             
@@ -92,7 +92,7 @@ public class CuentaNegocioImpl implements CuentaNegocio {
     }
     
     @Override
-    public boolean eliminarCuenta(String numeroCuenta) {
+    public boolean eliminarCuenta(int numeroCuenta) {
         try {
             if (!puedeEliminarCuenta(numeroCuenta)) {
                 return false;
@@ -107,7 +107,7 @@ public class CuentaNegocioImpl implements CuentaNegocio {
     }
     
     @Override
-    public Cuenta buscarCuenta(String numeroCuenta) {
+    public Cuenta buscarCuenta(int numeroCuenta) {
         try {
             return cuentaDAO.obtenerPorId(numeroCuenta);
         } catch (Exception e) {
@@ -135,7 +135,7 @@ public class CuentaNegocioImpl implements CuentaNegocio {
     }
     
     @Override
-    public boolean transferirSaldo(String numeroCuentaOrigen, String numeroCuentaDestino, double monto) {
+    public boolean transferirSaldo(int numeroCuentaOrigen, int numeroCuentaDestino, double monto) {
         try {
             // Validar monto
             if (monto <= 0) {
@@ -169,7 +169,7 @@ public class CuentaNegocioImpl implements CuentaNegocio {
     }
     
     @Override
-    public boolean depositarDinero(String numeroCuenta, double monto) {
+    public boolean depositarDinero(int numeroCuenta, double monto) {
         try {
             if (monto <= 0) {
                 return false;
@@ -190,7 +190,7 @@ public class CuentaNegocioImpl implements CuentaNegocio {
     }
     
     @Override
-    public boolean retirarDinero(String numeroCuenta, double monto) {
+    public boolean retirarDinero(int numeroCuenta, double monto) {
         try {
             if (monto <= 0) {
                 return false;
@@ -216,7 +216,7 @@ public class CuentaNegocioImpl implements CuentaNegocio {
     }
     
     @Override
-    public double consultarSaldo(String numeroCuenta) {
+    public double consultarSaldo(int numeroCuenta) {
         try {
             Cuenta cuenta = cuentaDAO.obtenerPorId(numeroCuenta);
             return cuenta != null ? cuenta.getSaldo() : -1;
@@ -256,49 +256,44 @@ public class CuentaNegocioImpl implements CuentaNegocio {
     }
     
     @Override
-    public String generarNumeroCuenta() {
-        String numeroCuenta;
+    public int generarNumeroCuenta() {
+        int numeroCuenta;
         Random random = new Random();
-        
+
         do {
-            // Generar número de cuenta de 12 dígitos
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 12; i++) {
-                sb.append(random.nextInt(10));
-            }
-            numeroCuenta = sb.toString();
+            // Generar número de cuenta de 6 dígitos (podés cambiar la cantidad)
+            numeroCuenta = 100000 + random.nextInt(900000);
         } while (cuentaDAO.existeNumeroCuenta(numeroCuenta));
-        
+
         return numeroCuenta;
     }
-    
+
     @Override
     public String generarCBU() {
         String cbu;
         Random random = new Random();
-        
+
         do {
-            // Generar CBU de 22 dígitos
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < 22; i++) {
                 sb.append(random.nextInt(10));
             }
             cbu = sb.toString();
         } while (cuentaDAO.existeCBU(cbu));
-        
+
         return cbu;
     }
     
     @Override
-    public boolean puedeEliminarCuenta(String numeroCuenta) {
+    public boolean puedeEliminarCuenta(int numeroCuenta) {
         try {
             Cuenta cuenta = cuentaDAO.obtenerPorId(numeroCuenta);
             if (cuenta == null) {
                 return false;
             }
             
-            // Solo se puede eliminar si el saldo es 0
-            return cuenta.getSaldo() == 0;
+            // Solo se puede eliminar si el saldo es mayor 0
+            return cuenta.getSaldo() > 0;
             
         } catch (Exception e) {
             e.printStackTrace();

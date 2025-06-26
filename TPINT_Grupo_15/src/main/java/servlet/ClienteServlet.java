@@ -103,5 +103,22 @@ public class ClienteServlet extends HttpServlet {
 				response.sendRedirect("vistas/AltaCliente.jsp?exito=false");
 			}
 		}
+		
+		// Baja lógica de cliente
+		if ("eliminar".equalsIgnoreCase(request.getParameter("accion"))) {
+		    try {
+		        String dni = request.getParameter("dni");
+		        boolean eliminado = clienteNegocio.eliminarCliente(dni);
+		        if (eliminado) {
+		            response.sendRedirect("ClienteServlet?destino=listar");
+		        } else {
+		            response.sendRedirect("ClienteServlet?destino=listar&error=true");
+		        }
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        response.sendRedirect("ClienteServlet?destino=listar&error=true");
+		    }
+		}
+		
 	}
 }
