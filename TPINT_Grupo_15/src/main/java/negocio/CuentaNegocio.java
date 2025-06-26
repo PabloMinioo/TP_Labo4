@@ -8,7 +8,7 @@ public interface CuentaNegocio {
     // Operaciones ABML con validaciones de negocio
     boolean crearCuenta(Cuenta cuenta);
     boolean modificarCuenta(Cuenta cuenta);
-    boolean eliminarCuenta(int numeroCuenta);
+    boolean eliminarCuenta(int numeroCuenta) throws Exception;
     Cuenta buscarCuenta(int numeroCuenta);
     List<Cuenta> listarCuentas() throws Exception;
     

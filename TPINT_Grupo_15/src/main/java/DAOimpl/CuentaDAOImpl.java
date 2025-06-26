@@ -13,7 +13,6 @@ public class CuentaDAOImpl implements CuentaDAO {
     
     private static final String INSERTAR = "INSERT INTO Cuentas (NumeroCuenta_Cu, ClienteDNI_Cu, FechaCreacion_Cu, TipoCuenta_Cu, CBU_Cu, SALDO_Cu) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String ACTUALIZAR = "UPDATE Cuentas SET ClienteDNI_Cu = ?, FechaCreacion_Cu = ?, TipoCuenta_Cu = ?, CBU_Cu = ?, SALDO_Cu = ? WHERE NumeroCuenta_Cu = ?";
-    private static final String ELIMINAR = "UPDATE Cuentas SET Estado_Cu = FALSE WHERE NumeroCuenta_Cu = ?";
     private static final String OBTENER_POR_ID = "SELECT * FROM Cuentas WHERE NumeroCuenta_Cu = ?";
     private static final String OBTENER_TODAS = "SELECT * FROM Cuentas ORDER BY NumeroCuenta_Cu";
     private static final String OBTENER_POR_CLIENTE = "SELECT * FROM Cuentas WHERE ClienteDNI_Cu = ?";
@@ -75,15 +74,13 @@ public class CuentaDAOImpl implements CuentaDAO {
     }
     
     @Override
-    public boolean eliminar(int numeroCuenta) {
-    	try (PreparedStatement statement = conexion.prepareStatement(ELIMINAR)) {
-            statement.setInt(1, numeroCuenta);
-            int filasAfectadas = statement.executeUpdate();
-            return filasAfectadas > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public boolean eliminar(int numeroCuenta) throws Exception {
+        String sql = "UPDATE Cuentas SET Estado_Cu = FALSE WHERE NumeroCuenta_Cu = ?";
+        try (Connection conn = Conexion.getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, numeroCuenta);
+            return ps.executeUpdate() > 0;
         }
-        return false;
     }
     
     @Override

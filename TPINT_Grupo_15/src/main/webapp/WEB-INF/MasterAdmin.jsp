@@ -129,8 +129,8 @@
         
             <nav>
                 <ul class="nav-menu">
-					<li><a href="<%= request.getContextPath() %>/ClienteServlet?Param=1&destino=listar">ABML Cliente</a></li>
-                    <li><a href="<%= request.getContextPath() %>/CuentaServlet?action=listar">ABML Cuentas</a></li>
+					<li><a href="<%= request.getContextPath() %>/ClienteServlet?Param=1&accion=listar">ABML Cliente</a></li>
+					<li><a href="<%= request.getContextPath() %>/CuentaServlet?accion=listar">ABML Cuentas</a></li>
                     <li><a href="#">Préstamos</a></li>
                     <li><a href="#">Informes</a></li>
 					 <li class="logout-item">

@@ -19,309 +19,130 @@ import negocioImpl.CuentaNegocioImpl;
 
 @WebServlet("/CuentaServlet")
 public class CuentaServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    
-    
-    private CuentaDAO cuentaDAOImpl = new CuentaDAOImpl();
-    private CuentaNegocio cuentaNegocio = new CuentaNegocioImpl();
-    
-    public CuentaServlet() {
-        super();
-        this.cuentaNegocio = new CuentaNegocioImpl();
-    }
-    
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-    	
-        String action = request.getParameter("action");
-        
-        if (action == null) {
-            action = "listar";
-        }
-        
-        switch (action) {
-            case "listar":
-                listarCuentas(request, response);
-                break;
-            case "nuevo":
-                mostrarFormularioNuevo(request, response);
-                break;
-            case "editar":
-                mostrarFormularioEditar(request, response);
-                break;
-            case "eliminar":
-                eliminarCuenta(request, response);
-                break;
-            case "ver":
-                verCuenta(request, response);
-                break;
-            case "buscarPorCliente":
-                buscarPorCliente(request, response);
-                break;
-            default:
-                listarCuentas(request, response);
-                break;
-        }
-    }
-    
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        String action = request.getParameter("action");
-        
-        switch (action) {
-            case "insertar":
-                insertarCuenta(request, response);
-                break;
-            case "actualizar":
-                actualizarCuenta(request, response);
-                break;
-            case "depositar":
-                depositarDinero(request, response);
-                break;
-            case "retirar":
-                retirarDinero(request, response);
-                break;
-            case "transferir":
-                transferirDinero(request, response);
-                break;
-            case "eliminar":
-                eliminarCuenta(request, response);
-                break;
-            default:
-                listarCuentas(request, response);
-                break;
-        }
-    }
-    
-   private void listarCuentas(HttpServletRequest request, HttpServletResponse response) 
-        throws ServletException, IOException {
-    	try
-        {
-        	List<Cuenta> listaCuentas = cuentaNegocio.listarCuentas();
-        	
-            request.setAttribute("listaCuentas", listaCuentas);
-            
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/vistas/ListarCuentas.jsp");
-            dispatcher.forward(request, response);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private void mostrarFormularioNuevo(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/nuevo.jsp");
-        dispatcher.forward(request, response);
-    }
-    
-    private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-    	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
-    	Cuenta cuenta = cuentaNegocio.buscarCuenta(numeroCuenta);
-        
-        request.setAttribute("cuenta", cuenta);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/editar.jsp");
-        dispatcher.forward(request, response);
-    }
-    
-    private void insertarCuenta(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        try {
-            String clienteDNI = request.getParameter("clienteDNI");
-            int tipoCuenta = Integer.parseInt(request.getParameter("tipoCuenta"));
-            double saldoInicial = Double.parseDouble(request.getParameter("saldoInicial"));
-            
-            Cuenta cuenta = new Cuenta();
-            cuenta.setClienteDNI(clienteDNI);
-            cuenta.setTipoCuenta(tipoCuenta);
-            cuenta.setSaldo(saldoInicial);
-            cuenta.setFechaCreacion(LocalDate.now());
-            
-            boolean exito = cuentaNegocio.crearCuenta(cuenta);
-            
-            if (exito) {
-                request.setAttribute("mensaje", "Cuenta creada exitosamente");
-                request.setAttribute("tipoMensaje", "success");
-            } else {
-                request.setAttribute("mensaje", "Error al crear la cuenta");
-                request.setAttribute("tipoMensaje", "error");
-            }
-            
-        } catch (Exception e) {
-            request.setAttribute("mensaje", "Error: " + e.getMessage());
-            request.setAttribute("tipoMensaje", "error");
-        }
-        
-        listarCuentas(request, response);
-    }
-    
-    private void actualizarCuenta(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        try {
-            int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
-            String clienteDNI = request.getParameter("clienteDNI");
-            int tipoCuenta = Integer.parseInt(request.getParameter("tipoCuenta"));
-            String cbu = request.getParameter("cbu");
-            double saldo = Double.parseDouble(request.getParameter("saldo"));
-            
-            Cuenta cuenta = new Cuenta();
-            cuenta.setNumeroCuenta(numeroCuenta);
-            cuenta.setClienteDNI(clienteDNI);
-            cuenta.setTipoCuenta(tipoCuenta);
-            cuenta.setCbu(cbu);
-            cuenta.setSaldo(saldo);
-            
-            boolean exito = cuentaNegocio.modificarCuenta(cuenta);
-            
-            if (exito) {
-                request.setAttribute("mensaje", "Cuenta actualizada exitosamente");
-                request.setAttribute("tipoMensaje", "success");
-            } else {
-                request.setAttribute("mensaje", "Error al actualizar la cuenta");
-                request.setAttribute("tipoMensaje", "error");
-            }
-            
-        } catch (Exception e) {
-            request.setAttribute("mensaje", "Error: " + e.getMessage());
-            request.setAttribute("tipoMensaje", "error");
-        }
-        
-        listarCuentas(request, response);
-    }
-    
-    private void eliminarCuenta(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        try {
-        	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
-        	boolean exito = cuentaNegocio.eliminarCuenta(numeroCuenta);
-            
-            if (exito) {
-                request.setAttribute("mensaje", "Cuenta eliminada exitosamente");
-                request.setAttribute("tipoMensaje", "success");
-            } else {
-                request.setAttribute("mensaje", "No se puede eliminar la cuenta. Verifique que el saldo sea $0");
-                request.setAttribute("tipoMensaje", "error");
-            }
-            
-        } catch (Exception e) {
-            request.setAttribute("mensaje", "Error: " + e.getMessage());
-            request.setAttribute("tipoMensaje", "error");
-        }
-        
-        listarCuentas(request, response);
-    }
-    
-    private void verCuenta(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-    	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
-    	Cuenta cuenta = cuentaNegocio.buscarCuenta(numeroCuenta);
-        
-        request.setAttribute("cuenta", cuenta);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/cuentas/ver.jsp");
-        dispatcher.forward(request, response);
-    }
-    
-    private void buscarPorCliente(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        String clienteDNI = request.getParameter("clienteDNI");
-        List<Cuenta> listaCuentas = cuentaNegocio.listarCuentasPorCliente(clienteDNI);
-        
-        request.setAttribute("listaCuentas", listaCuentas);
-        request.setAttribute("clienteDNI", clienteDNI);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/vistas/ListarCuentas.jsp");
-        dispatcher.forward(request, response);
-    }
-    
-    private void depositarDinero(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        try {
-        	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
-        	double monto = Double.parseDouble(request.getParameter("monto"));
+	private static final long serialVersionUID = 1L;
 
-        	boolean exito = cuentaNegocio.depositarDinero(numeroCuenta, monto);
-            
-            if (exito) {
-                request.setAttribute("mensaje", "Depósito realizado exitosamente");
-                request.setAttribute("tipoMensaje", "success");
-            } else {
-                request.setAttribute("mensaje", "Error al realizar el depósito");
-                request.setAttribute("tipoMensaje", "error");
-            }
-            
-        } catch (Exception e) {
-            request.setAttribute("mensaje", "Error: " + e.getMessage());
-            request.setAttribute("tipoMensaje", "error");
-        }
-        
-        listarCuentas(request, response);
-    }
-    
-    private void retirarDinero(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        try {
-        	int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
-        	double monto = Double.parseDouble(request.getParameter("monto"));
+	// INTANCIAMOS LAS CAPAS
+	private CuentaNegocio cuentaNegocio = new CuentaNegocioImpl();
 
-        	boolean exito = cuentaNegocio.retirarDinero(numeroCuenta, monto);
-            
-            if (exito) {
-                request.setAttribute("mensaje", "Retiro realizado exitosamente");
-                request.setAttribute("tipoMensaje", "success");
-            } else {
-                request.setAttribute("mensaje", "Error al realizar el retiro. Verifique el saldo disponible");
-                request.setAttribute("tipoMensaje", "error");
-            }
-            
-        } catch (Exception e) {
-            request.setAttribute("mensaje", "Error: " + e.getMessage());
-            request.setAttribute("tipoMensaje", "error");
-        }
-        
-        listarCuentas(request, response);
-    }
-    
-    private void transferirDinero(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        try {
-        	int numeroCuentaOrigen = Integer.parseInt(request.getParameter("numeroCuentaOrigen"));
-        	int numeroCuentaDestino = Integer.parseInt(request.getParameter("numeroCuentaDestino"));
-        	double monto = Double.parseDouble(request.getParameter("monto"));
-
-        	boolean exito = cuentaNegocio.transferirSaldo(numeroCuentaOrigen, numeroCuentaDestino, monto);
-            
-            if (exito) {
-                request.setAttribute("mensaje", "Transferencia realizada exitosamente");
-                request.setAttribute("tipoMensaje", "success");
-            } else {
-                request.setAttribute("mensaje", "Error al realizar la transferencia. Verifique los datos y saldo disponible");
-                request.setAttribute("tipoMensaje", "error");
-            }
-            
-        } catch (Exception e) {
-            request.setAttribute("mensaje", "Error: " + e.getMessage());
-            request.setAttribute("tipoMensaje", "error");
-        }
-        
-        listarCuentas(request, response);
-    }
-
-	public CuentaDAOImpl getCuentaDAOImpl() {
-		return (CuentaDAOImpl) cuentaDAOImpl;
+	// CONSTRUCTOR VACIO
+	public CuentaServlet() {
+		super();
+		this.cuentaNegocio = new CuentaNegocioImpl();
 	}
 
-	public void setCuentaDAOImpl(CuentaDAOImpl cuentaDAOImpl) {
-		this.cuentaDAOImpl = cuentaDAOImpl;
+	// PETICIONES GET:
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// OBTENEMOS EL PARAMETRO DEL JSP
+		String action = request.getParameter("accion");
+		// POR DEFECTO, HACEMOS QUE LISTE LAS CUENTAS SIN FILTROS
+		if (action == null) {
+			action = "listar";
+		}
+		// SEGUN LA ACCION, REDIRIGIMOS AL METODO CORRESPONDIENTE
+		switch (action) {
+			// MOSTRAR LISTADO DE CUENTAS
+			case "listar":
+				listarCuentas(request, response);
+				break;
+	        // REDIRIGIR A 'AltaCuenta.jsp'
+			default:
+				response.sendRedirect("vistas/AltaCuenta.jsp");
+				break;
+		}
+	}
+	
+	// PETICIONES POST:
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// OBTENEMOS EL PARAMETRO DEL JSP
+		String action = request.getParameter("accion");
+		// SEGUN LA ACCION, REDIRIGIMOS AL METODO CORRESPONDIENTE
+		switch (action) {
+			// DAR DE ALTA UNA CUENTA
+			case "alta":
+				altaCuenta(request, response);
+				break;
+			// ELIMINAR UNA CUENTA
+			case "eliminar":
+				eliminarCuenta(request, response);
+				break;
+            // POR DEFECTO, LISTAMOS TODAS LAS CUENTAS
+            default:
+                response.sendRedirect("CuentaServlet?accion=listar");
+                break;
+		}
+	}
+	
+	// METODO PARA LISTAR CUENTAS
+	private void listarCuentas(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+			List<Cuenta> listaCuentas = cuentaNegocio.listarCuentas();
+			request.setAttribute("listaCuentas", listaCuentas);
+			RequestDispatcher dispatcher = request.getRequestDispatcher("/vistas/ListarCuentas.jsp");
+			dispatcher.forward(request, response);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+    // METODO PARA DAR DE ALTA UNA CUENTA
+	private void altaCuenta(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		try {
+			// OBTENEMOS LOS VALORES DEL JSP
+			String clienteDNI = request.getParameter("clienteDNI");
+			int tipoCuenta = Integer.parseInt(request.getParameter("tipoCuenta"));
+			double saldoInicial = Double.parseDouble(request.getParameter("saldoInicial"));
+			
+			// CREAMOS UN OBJETO CUENTA
+			Cuenta cuenta = new Cuenta();
+			
+			// CARGAMOS AL OBJETO 'CUENTA' LOS VALORES DEL JSP
+			cuenta.setClienteDNI(clienteDNI);
+			cuenta.setTipoCuenta(tipoCuenta);
+			cuenta.setSaldo(saldoInicial);
+			cuenta.setFechaCreacion(LocalDate.now());
+
+			// GUARDAMOS LOS REGISTROS EN LA BD
+			boolean exito = cuentaNegocio.crearCuenta(cuenta);
+			if (exito) {
+				request.setAttribute("mensaje", "Cuenta creada exitosamente");
+				request.setAttribute("tipoMensaje", "success");
+			} else {
+				request.setAttribute("mensaje", "Error al crear la cuenta");
+				request.setAttribute("tipoMensaje", "error");
+			}
+
+		} catch (Exception e) {
+			request.setAttribute("mensaje", "Error: " + e.getMessage());
+			request.setAttribute("tipoMensaje", "error");
+		}
+	}
+
+	// METODO PARA ELIMINAR UNA CUENTA
+	private void eliminarCuenta(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+			// OBTENEMOS EL NUMERO DE CUENTA
+			int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
+			// REALIZAMOS LA BAJA LOGICA DE LA CUENTA
+			boolean exito = cuentaNegocio.eliminarCuenta(numeroCuenta);
+			if (exito) {
+				response.sendRedirect("CuentaServlet?accion=listar");
+			} else {
+				response.sendRedirect("CuentaServlet?accion=listar&error=true");
+			}
+
+		} catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("CuentaServlet?accion=listar&error=true");
+		}
+
+		listarCuentas(request, response);
 	}
 }

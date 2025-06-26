@@ -92,18 +92,8 @@ public class CuentaNegocioImpl implements CuentaNegocio {
     }
     
     @Override
-    public boolean eliminarCuenta(int numeroCuenta) {
-        try {
-            if (!puedeEliminarCuenta(numeroCuenta)) {
-                return false;
-            }
-            
-            return cuentaDAO.eliminar(numeroCuenta);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean eliminarCuenta(int numeroCuenta) throws Exception {
+    	return cuentaDAO.eliminar(numeroCuenta);
     }
     
     @Override

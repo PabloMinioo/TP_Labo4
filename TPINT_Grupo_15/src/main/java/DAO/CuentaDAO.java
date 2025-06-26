@@ -8,7 +8,7 @@ public interface CuentaDAO {
     // Operaciones basicas
     boolean insertar(Cuenta cuenta);
     boolean actualizar(Cuenta cuenta);
-    boolean eliminar(int numeroCuenta);
+    boolean eliminar(int numeroCuenta) throws Exception;
     Cuenta obtenerPorId(int numeroCuenta);
     List<Cuenta> listarCuentas() throws Exception;
     

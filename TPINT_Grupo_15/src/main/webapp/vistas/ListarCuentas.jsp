@@ -104,7 +104,7 @@ tr:hover {
 
 	<div class="listado-wrapper">
 		<div class="acciones">
-			<a href="AltaCuenta.jsp">Nueva Cuenta</a>
+			<a href="<%= request.getContextPath() %>/vistas/AltaCuenta.jsp">Nueva Cuenta</a>
 		</div>
 
 		<table>
@@ -139,7 +139,7 @@ tr:hover {
 						<div class="acciones-btn">
 								<form action="CuentaServlet" method="post" style="display:inline;" 
           						onsubmit="return confirm('¿Está seguro que desea eliminar esta cuenta?');">
-      							<input type="hidden" name="action" value="eliminar" />
+      							<input type="hidden" name="accion" value="eliminar" />
      							 <input type="hidden" name="numeroCuenta" value="<%= cu.getNumeroCuenta() %>" />
       							<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
     							</form>

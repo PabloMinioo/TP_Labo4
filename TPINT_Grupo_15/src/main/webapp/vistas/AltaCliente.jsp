@@ -1,10 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-	
-	
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="entidad.Provincia" %>
+
+
+<%@ page import="java.util.List"%>
+<%@ page import="java.util.ArrayList"%>
+<%@ page import="entidad.Provincia"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -62,10 +62,11 @@ input[type="submit"]:hover {
 </head>
 <body>
 	<jsp:include page="/WEB-INF/MasterAdmin.jsp" />
-	
+
 
 	<div class="contenedor">
 		<form class="altaCliente" action="ClienteServlet" method="post">
+			<input type="hidden" name="accion" value="alta" />
 			<h2>Alta de Cliente</h2>
 			<br> <label>DNI: </label><input type="text" name="dni" required><br>
 			<label>CUIL: </label><input type="text" name="cuil" required><br>
@@ -78,35 +79,37 @@ input[type="submit"]:hover {
 				name="nacionalidad"><br> <label>Fecha de
 				Nacimiento: </label><input type="date" name="fechaNacimiento"><br>
 			<label>Dirección: </label><input type="text" name="direccion"><br>
-			
 
-<!-- cargo la ddl de provincias, apenas entro a al jsp, yaque primero pasa por el servlet cargga provincias y despues redirrecciona al ALtaCliente.jsp, con la ddl cargada-->
-<%
+
+			<!-- cargo la ddl de provincias, apenas entro a al jsp, yaque primero pasa por el servlet cargga provincias y despues redirrecciona al ALtaCliente.jsp, con la ddl cargada-->
+			<%
     List<Provincia> provincias = (List<Provincia>) request.getAttribute("provincias");
     if (provincias == null) {
         provincias = new ArrayList<>();
     }
 %>
-			<label>Provincia:</label> <select name="provincia" id="ddlProvincia" onchange="cargarLocalidades()" required>
-            <option value="">Seleccione una provincia</option>
-             <%
+			<label>Provincia:</label> <select name="provincia" id="ddlProvincia"
+				onchange="cargarLocalidades()" required>
+				<option value="">Seleccione una provincia</option>
+				<%
         for (Provincia prov : provincias) {
     %>
-        <option value="<%= prov.getId() %>"><%= prov.getDescripcion() %></option>
-    <%
+				<option value="<%= prov.getId() %>"><%= prov.getDescripcion() %></option>
+				<%
         }
     %>
-    </select><br> 
-    
-    <!--CARGO la DDL LOCALIDADes ; uso javaScript para que el servlet me devulva las localiades de la porvinvia que seleccione , como? : hace la llamada AJAX al servlet CargarLocalidades enviándole el ID de la provincia seleccionada.Ese servlet responde con las localidades de esa provincia en formato JSON.
+			</select><br>
+
+			<!--CARGO la DDL LOCALIDADes ; uso javaScript para que el servlet me devulva las localiades de la porvinvia que seleccione , como? : hace la llamada AJAX al servlet CargarLocalidades enviándole el ID de la provincia seleccionada.Ese servlet responde con las localidades de esa provincia en formato JSON.
 
 El JavaScript recibe ese JSON y llena el <select> de localidades (ddlLocalidad) dinámicamente.-->
 
-    <label>Localidad: </label><select name="localidad" id="ddlLocalidad" required>
-             <option value="">Seleccione una localidad</option>
-                  </select><br> 
-                  
-              <script>// aca empieza el scip conel ajax
+			<label>Localidad: </label><select name="localidad" id="ddlLocalidad"
+				required>
+				<option value="">Seleccione una localidad</option>
+			</select><br>
+
+			<script>// aca empieza el scip conel ajax
               function cargarLocalidades() {
             	    var provinciaId = document.getElementById("ddlProvincia").value;
             	    var ddlLocalidad = document.getElementById("ddlLocalidad");
@@ -171,17 +174,18 @@ El JavaScript recibe ese JSON y llena el <select> de localidades (ddlLocalidad) 
             	    xhr.send();
 }
 </script>
-              
+
 			<label>Correo Electrónico: </label><input type="email" name="email"><br>
 			<label>Teléfonos: </label><input type="text" name="telefonos"><br>
 			<label>Usuario: </label><input type="text" name="usuario" required><br>
 			<label>Contraseña: </label><input type="password" name="password"
-				required><br> <input type="submit" name="btnAgregar" value="Registrar">
+				required><br> <input type="submit" name="btnAgregar"
+				value="Registrar">
 		</form>
 		<!-- Alertas de CLiente agreggado corecctamente o Error al argegar cliente -->
 
 	</div>
-<script>
+	<script>
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("exito") === "true") {
