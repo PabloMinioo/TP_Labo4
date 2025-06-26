@@ -7,7 +7,7 @@ import entidad.Usuario;
 public interface UsuarioDAO {
 	    Usuario validarUsuarioLogin(String usuario, String contrasenia);
 	    Boolean agregarUsuario(Usuario objCargado) throws SQLException;; 
-	   // boolean existeUsuario(String usuario);
+	    boolean actualizarPassword(String dni, String nuevaPassword) throws Exception;
 
 	}
 

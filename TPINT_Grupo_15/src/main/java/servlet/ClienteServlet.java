@@ -48,6 +48,11 @@ public class ClienteServlet extends HttpServlet {
             case "listar":
                 listarClientes(request, response);
                 break;
+            // EDITAR UN CLIENTE MEDIANTE SU DNI
+            case "modificar":
+            	request.setAttribute("editarDni", request.getParameter("dni"));
+            	listarClientes(request, response);
+            	break;
             // REDIRIGIR A 'AltaCliente.jsp'
             default:
                 response.sendRedirect("vistas/AltaCliente.jsp");
@@ -70,6 +75,10 @@ public class ClienteServlet extends HttpServlet {
             case "eliminar":
                 eliminarCliente(request, response);
                 break;
+            // MODIFICAR UN CLIENTE
+            case "modificar":
+                modificarCliente(request, response);
+                break;
             // POR DEFECTO, LISTAMOS TODOS LOS CLIENTES
             default:
                 response.sendRedirect("ClienteServlet?accion=listar");
@@ -83,10 +92,12 @@ public class ClienteServlet extends HttpServlet {
         try {
             List<Cliente> listaClientes = clienteNegocio.listarClientes();
             request.setAttribute("listaClientes", listaClientes);
+            System.out.println("Clientes recuperados: " + listaClientes);
             RequestDispatcher rd = request.getRequestDispatcher("/vistas/ListarClientes.jsp");
             rd.forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
+            throw new ServletException("Error al listar clientes", e); // MUY IMPORTANTE
         }
     }
 
@@ -152,6 +163,43 @@ public class ClienteServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect("ClienteServlet?accion=listar&error=true");
+        }
+    }
+    
+    private void modificarCliente(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            Cliente cliente = new Cliente();
+            cliente.setDni(request.getParameter("dni"));
+            cliente.setCuil(request.getParameter("cuil"));
+            cliente.setNombre(request.getParameter("nombre"));
+            cliente.setApellido(request.getParameter("apellido"));
+            cliente.setSexo(request.getParameter("sexo"));
+            cliente.setNacionalidad(request.getParameter("nacionalidad"));
+            cliente.setFechaNacimiento(LocalDate.parse(request.getParameter("fechaNacimiento")));
+            cliente.setDireccion(request.getParameter("direccion"));
+            cliente.setIdProvincia(request.getParameter("provincia"));
+            cliente.setIdLocalidad(request.getParameter("localidad"));
+            cliente.setCorreoElectronico(request.getParameter("email"));
+            cliente.setTelefonos(request.getParameter("telefonos"));
+            cliente.setEstado(true);
+
+            boolean exitoCliente = clienteNegocio.modificarCliente(cliente);
+
+            String nuevaPassword = request.getParameter("password");
+            boolean exitoUsuario = true;
+            if (nuevaPassword != null && !nuevaPassword.isEmpty()) {
+                exitoUsuario = usuarioNegocio.actualizarPassword(cliente.getDni(), nuevaPassword);
+            }
+
+            if (exitoCliente && exitoUsuario) {
+                response.sendRedirect("ClienteServlet?accion=listar&modificado=true");
+            } else {
+                response.sendRedirect("ClienteServlet?accion=listar&modificado=false");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("ClienteServlet?accion=listar&modificado=false");
         }
     }
 }

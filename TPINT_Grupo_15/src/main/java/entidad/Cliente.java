@@ -15,6 +15,8 @@ public class Cliente {
     private String idProvincia;
     private String correoElectronico;
     private String telefonos;
+    private String nombreUsuario;
+    private String contraseniaUsuario;
     private boolean estado;
     
     // Constructor vacío
@@ -80,25 +82,23 @@ public class Cliente {
     public String getTelefonos() { return telefonos; }
     public void setTelefonos(String telefonos) { this.telefonos = telefonos; }
 
+    public String getNombreUsuario() { return nombreUsuario; }
+    public void setNombreUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
+
+    public String getContraseniaUsuario() { return contraseniaUsuario; }
+    public void setContraseniaUsuario(String contraseniaUsuario) { this.contraseniaUsuario = contraseniaUsuario; }
+    
     public boolean getEstado() { return estado; }
     public void setEstado(boolean estado) { this.estado = estado; }
+
+	@Override
+	public String toString() {
+		return "Cliente [dni=" + dni + ", cuil=" + cuil + ", nombre=" + nombre + ", apellido=" + apellido + ", sexo="
+				+ sexo + ", nacionalidad=" + nacionalidad + ", fechaNacimiento=" + fechaNacimiento + ", direccion="
+				+ direccion + ", idLocalidad=" + idLocalidad + ", idProvincia=" + idProvincia + ", correoElectronico="
+				+ correoElectronico + ", telefonos=" + telefonos + ", nombreUsuario=" + nombreUsuario
+				+ ", contraseniaUsuario=" + contraseniaUsuario + ", estado=" + estado + "]";
+	}
     
-    @Override
-    public String toString() {
-        return "Cliente{" +
-                "dni='" + dni + '\'' +
-                ", cuil='" + cuil + '\'' +
-                ", nombre='" + nombre + '\'' +
-                ", apellido='" + apellido + '\'' +
-                ", sexo='" + sexo + '\'' +
-                ", nacionalidad='" + nacionalidad + '\'' +
-                ", fechaNacimiento=" + fechaNacimiento +
-                ", direccion='" + direccion + '\'' +
-                ", idLocalidad='" + idLocalidad + '\'' +
-                ", idProvincia='" + idProvincia + '\'' +
-                ", correoElectronico='" + correoElectronico + '\'' +
-                ", telefonos='" + telefonos + '\'' +
-                ", estado=" + estado +
-                '}';
-    }
+
 }

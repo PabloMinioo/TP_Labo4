@@ -104,7 +104,10 @@ public class ClienteDAOimpl implements ClienteDAO {
     @Override
     public List<Cliente> listarClientes() throws Exception {
         List<Cliente> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Clientes WHERE Estado_Cl = TRUE";
+        String sql = "SELECT c.*, u.Nombre_Usu, u.Contrasenia_Usu " +
+                "FROM Clientes c " +
+                "INNER JOIN Usuarios u ON c.DNI_Cl = u.DNI_Usu " +
+                "WHERE c.Estado_Cl = TRUE";
         try (Connection conn = Conexion.getConexion();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -123,6 +126,9 @@ public class ClienteDAOimpl implements ClienteDAO {
                 cliente.setCorreoElectronico(rs.getString("CorreoElectronico_Cl"));
                 cliente.setTelefonos(rs.getString("Telefonos_Cl"));
                 cliente.setEstado(rs.getBoolean("Estado_Cl"));
+                // Agregá los campos del usuario como extra
+                cliente.setNombreUsuario(rs.getString("Nombre_Usu")); // este campo lo agregás temporalmente
+                cliente.setContraseniaUsuario(rs.getString("Contrasenia_Usu")); // idem
                 lista.add(cliente);
             }
         }

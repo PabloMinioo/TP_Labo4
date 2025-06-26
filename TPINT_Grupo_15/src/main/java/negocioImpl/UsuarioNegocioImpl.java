@@ -23,5 +23,9 @@ public class UsuarioNegocioImpl implements UsuarioNegocio {
    public boolean agregarUsuario(Usuario usuario) throws SQLException {
        return usuarioDAO.agregarUsuario(usuario);
    }
-    
+   
+   @Override
+   public boolean actualizarPassword(String dni, String nuevaPassword) throws Exception {
+       return usuarioDAO.actualizarPassword(dni, nuevaPassword);
+   }
 }

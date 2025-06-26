@@ -130,13 +130,55 @@ tr:hover {
 			</thead>
 			<tbody>
 				<!-- OBTENEMOS LA LISTA DE LOS CLIENTES Y LA RECORREMOS -->
-				
+				<!-- GUARDAMOS EL DNI DEL CLIENTE QUE SE VA A EDITAR -->
 				<%
+				String editarDni = (String) request.getAttribute("editarDni");
 				List<Cliente> listaClientes = (List<Cliente>) request.getAttribute("listaClientes");
-				if (listaClientes != null && !listaClientes.isEmpty()) {
+				if (listaClientes != null) {
 					for (Cliente cli : listaClientes) {
+						boolean enEdicion = editarDni != null && editarDni.equals(cli.getDni());
 				%>
 				<tr>
+					<%
+					if (enEdicion) {
+					%>
+					<!-- FILA EN MODO EDICIÓN -->
+					<form action="ClienteServlet" method="post">
+						<input type="hidden" name="accion" value="modificar"> <input
+							type="hidden" name="dni" value="<%=cli.getDni()%>">
+						<td><%=cli.getDni()%></td>
+						<td><input type="text" name="cuil" value="<%=cli.getCuil()%>"></td>
+						<td><input type="text" name="nombre"
+							value="<%=cli.getNombre()%>"></td>
+						<td><input type="text" name="apellido"
+							value="<%=cli.getApellido()%>"></td>
+						<td><input type="text" name="sexo" value="<%=cli.getSexo()%>"></td>
+						<td><input type="text" name="nacionalidad"
+							value="<%=cli.getNacionalidad()%>"></td>
+						<td><input type="date" name="fechaNacimiento"
+							value="<%=cli.getFechaNacimiento()%>"></td>
+						<td><input type="text" name="direccion"
+							value="<%=cli.getDireccion()%>"></td>
+						<td><input type="text" name="localidad"
+							value="<%=cli.getIdLocalidad()%>"></td>
+						<td><input type="text" name="provincia"
+							value="<%=cli.getIdProvincia()%>"></td>
+						<td><input type="email" name="email"
+							value="<%=cli.getCorreoElectronico()%>"></td>
+						<td><input type="text" name="telefonos"
+							value="<%=cli.getTelefonos()%>"></td>
+						<td><%=cli.getNombreUsuario()%></td>
+						<td><input type="text" name="password" value="<%=cli.getContraseniaUsuario()%>"></td>
+						<td>
+							<button type="submit" class="btn-accion btn-modificar">Guardar</button>
+							<a href="ClienteServlet?accion=listar"
+							class="btn-accion btn-eliminar">Cancelar</a>
+						</td>
+					</form>
+					<%
+					} else {
+					%>
+					<!-- FILA NORMAL -->
 					<td><%=cli.getDni()%></td>
 					<td><%=cli.getCuil()%></td>
 					<td><%=cli.getNombre()%></td>
@@ -149,29 +191,29 @@ tr:hover {
 					<td><%=cli.getIdProvincia()%></td>
 					<td><%=cli.getCorreoElectronico()%></td>
 					<td><%=cli.getTelefonos()%></td>
-					<td>FALTA DESARROLLAS JOIN</td>
-					<!-- Placeholder, ver nota abajo -->
-					<td>FALTA DESARROLLAS JOIN</td>
-					<!-- Contraseña no se muestra -->
+					<td><%=cli.getNombreUsuario()%></td>
+					<td><%=cli.getContraseniaUsuario()%></td>
 					<td>
 						<div class="acciones-btn">
-							<button type="submit" class="btn-accion btn-modificar">Modificar</button>
-							<form method="post" action="ClienteServlet" onsubmit="return confirm('¿Está seguro que desea eliminar este cliente?');">
-    							<input type="hidden" name="accion" value="eliminar">
-    							<input type="hidden" name="dni" value="<%=cli.getDni()%>">
-    						<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
+							<form method="get" action="ClienteServlet">
+								<input type="hidden" name="accion" value="modificar"> <input
+									type="hidden" name="dni" value="<%=cli.getDni()%>">
+								<button type="submit" class="btn-accion btn-modificar">Modificar</button>
+							</form>
+							<form method="post" action="ClienteServlet"
+								onsubmit="return confirm('¿Está seguro que desea eliminar este cliente?');">
+								<input type="hidden" name="accion" value="eliminar"> <input
+									type="hidden" name="dni" value="<%=cli.getDni()%>">
+								<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
 							</form>
 						</div>
 					</td>
+					<%
+					}
+					%>
 				</tr>
 				<%
 				}
-				} else {
-				%>
-				<tr>
-					<td colspan="5">No hay clientes disponibles.</td>
-				</tr>
-				<%
 				}
 				%>
 			</tbody>
