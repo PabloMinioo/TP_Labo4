@@ -53,32 +53,19 @@
 	<jsp:include page="/WEB-INF/MasterAdmin.jsp" />
 	<div class="contenedor">
 		
-		<form action="<%=request.getContextPath()%>/CuentaServlet?accion=alta" method="post">
+		<form action="ClienteServlet" method="post">
 			<h2>Alta de Cuenta Bancaria</h2><br>
-		    <label> Dni del Cliente: </label><input type="text" name="cliente"><br>
+		    <label>Cliente: </label><input type="text" name="cliente"><br>
 		    <label>Fecha de Creación: </label><input type="date" name="fechaCreacion"><br>
 		    <label>Tipo de Cuenta: </label>
 		    <select name="tipoCuenta">
-		        <option value="1">Caja de ahorro</option>
-		        <option value="2">Cuenta corriente</option>
+		        <option value="Caja de ahorro">Caja de ahorro</option>
+		        <option value="Cuenta corriente">Cuenta corriente</option>
 		    </select><br>
-		    <!-- lo voy a ocmentar ya que el numero de cuenta es automatico en la bd y el cbu es ramdom  -->
-		    <!--  <label>Número de Cuenta: </label><input type="text" name="numeroCuenta"><br> -->
-		    <!-- <label>CBU: </label><input type="text" name="cbu"><br> -->
-		   
-		    
-		    <label>Saldo: <b>10.000$</b></label> <!-- <input type="number" name="saldo"><br> -->
+		    <label>Número de Cuenta: </label><input type="text" name="numeroCuenta"><br>
+		    <label>CBU: </label><input type="text" name="cbu"><br>
+		    <label>Saldo: </label><input type="number" name="saldo"><br>
 		    <input type="submit" value="Crear Cuenta">
-		    <br>
-			
 		</form>
-		    <br>
-		<!--Mensaje segun la validacion de si existe o no el dni yla cantidad de cuentas scriplerr-->
-				 <% if (request.getAttribute("mensaje") != null) { %>
-   				 <label style="color: red;"><%= request.getAttribute("mensaje") %></label>
-				<% } %>
-		    
 	</div>
-	
-	
 </body>
