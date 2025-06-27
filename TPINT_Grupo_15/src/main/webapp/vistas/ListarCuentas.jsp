@@ -1,14 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-	<%@ page import="java.util.List"%>
-	<%@ page import="entidad.Cuenta"%>
+<%@ page import="java.util.List"%>
+<%@ page import="entidad.Cuenta"%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Listado de Cuentas</title>
 <style>
-
 body {
 	font-family: Arial;
 	background-color: #f8f9fa;
@@ -49,6 +48,7 @@ table {
 	border: 1px solid #ccc;
 	margin: auto;
 }
+
 th, td {
 	padding: 12px;
 	border: 1px solid #ccc;
@@ -104,19 +104,20 @@ tr:hover {
 
 	<div class="listado-wrapper">
 		<div class="acciones">
-			<a href="<%= request.getContextPath() %>/vistas/AltaCuenta.jsp">Nueva Cuenta</a>
+			<a href="<%= request.getContextPath() %>/vistas/AltaCuenta.jsp">Nueva
+				Cuenta</a>
 		</div>
 
 		<table>
 			<thead>
 				<tr>
-                <th>Número Cuenta</th>
-                <th>DNI Cliente</th>
-                <th>Fecha de Creación</th>
-                <th>Tipo de Cuenta</th>
-                <th>CBU</th>
-                <th>Saldo</th>
-                <th>Acciones</th>
+					<th>Número Cuenta</th>
+					<th>DNI Cliente</th>
+					<th>Fecha de Creación</th>
+					<th>Tipo de Cuenta</th>
+					<th>CBU</th>
+					<th>Saldo</th>
+					<th>Acciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -137,13 +138,15 @@ tr:hover {
 					<td><%=cu.getSaldo() %></td>
 					<td>
 						<div class="acciones-btn">
-								<form action="CuentaServlet" method="post" style="display:inline;" 
-          						onsubmit="return confirm('¿Está seguro que desea eliminar esta cuenta?');">
-      							<input type="hidden" name="accion" value="eliminar" />
-     							 <input type="hidden" name="numeroCuenta" value="<%= cu.getNumeroCuenta() %>" />
-      							<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
-    							</form>
-								<button type="submit" class="btn-accion btn-modificar">Modificar</button>
+							<form action="CuentaServlet" method="post"
+								style="display: inline;"
+								onsubmit="return confirm('¿Está seguro que desea eliminar esta cuenta?');">
+								<input type="hidden" name="accion" value="eliminar" /> <input
+									type="hidden" name="numeroCuenta"
+									value="<%= cu.getNumeroCuenta() %>" />
+								<button type="submit" class="btn-accion btn-eliminar">Eliminar</button>
+							</form>
+							<button type="submit" class="btn-accion btn-modificar">Modificar</button>
 						</div>
 					</td>
 				</tr>
