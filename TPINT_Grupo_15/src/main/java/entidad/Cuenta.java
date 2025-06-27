@@ -10,7 +10,10 @@ public class Cuenta {
     private int tipoCuenta;
     private String cbu;
     private double saldo;
-    
+    private boolean estado;
+    private String nombreTipoCuenta;
+
+   
     // Constructor vacío
     public Cuenta() {
         this.saldo = 0.0;
@@ -19,13 +22,16 @@ public class Cuenta {
     
     // Constructor con parametros
     public Cuenta(int numeroCuenta, String clienteDNI, LocalDate fechaCreacion, 
-                  int tipoCuenta, String cbu, double saldo) {
+                  int tipoCuenta, String cbu, double saldo,boolean estado) {
         this.numeroCuenta = numeroCuenta;
         this.clienteDNI = clienteDNI;
         this.fechaCreacion = fechaCreacion;
         this.tipoCuenta = tipoCuenta;
         this.cbu = cbu;
         this.saldo = saldo;
+        this.estado=estado;
+        
+        
     }
     
     // Getters y Setters
@@ -77,19 +83,33 @@ public class Cuenta {
         this.saldo = saldo;
     }
     
-    //metodo to string 
-    @Override
-    public String toString() {
-        return "Cuenta{" +
-                "numeroCuenta='" + numeroCuenta + '\'' +
-                ", clienteDNI='" + clienteDNI + '\'' +
-                ", fechaCreacion=" + fechaCreacion +
-                ", tipoCuenta=" + tipoCuenta +
-                ", cbu='" + cbu + '\'' +
-                ", saldo=" + saldo +
-                '}';
+    // getter
+    public String getNombreTipoCuenta() {
+        return nombreTipoCuenta;
     }
 
+    // setter
+    public void setNombreTipoCuenta(String nombreTipoCuenta) {
+        this.nombreTipoCuenta = nombreTipoCuenta;
+    }
+    
+    
+    public boolean isEstado() {
+		return estado;
+	}
+
+	public void setEstado(boolean estado) {
+		this.estado = estado;
+	}
+
+	@Override
+	public String toString() {
+		return "Cuenta [numeroCuenta=" + numeroCuenta + ", clienteDNI=" + clienteDNI + ", fechaCreacion="
+				+ fechaCreacion + ", tipoCuenta=" + tipoCuenta + ", cbu=" + cbu + ", saldo=" + saldo + ", estado="
+				+ estado + ", nombreTipoCuenta=" + nombreTipoCuenta + "]";
+	}
+
+	
 	
 
 

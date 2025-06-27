@@ -1,21 +1,28 @@
 package DAO;
 
+import entidad.Cliente;
 import entidad.Cuenta;
+
+import java.sql.SQLException;
 import java.util.List;
 
 public interface CuentaDAO {
     
     // Operaciones basicas
-    boolean insertar(Cuenta cuenta);
-    boolean actualizar(Cuenta cuenta);
-    boolean eliminar(int numeroCuenta) throws Exception;
-    Cuenta obtenerPorId(int numeroCuenta);
-    List<Cuenta> listarCuentas() throws Exception;
-    
+//    boolean insertar(Cuenta cuenta);
+//    boolean actualizar(Cuenta cuenta);
+//    boolean eliminar(int numeroCuenta) throws Exception;
+//    Cuenta obtenerPorId(int numeroCuenta);
+	 boolean modificarCuenta(Cuenta cuenta) throws Exception;
+    List<Cuenta> listarCuentas() throws Exception;///celi
+       boolean insertar(Cuenta cuenta) throws SQLException;///judi
     //  Operaciones de consultas 
-    List<Cuenta> obtenerPorClienteDNI(String clienteDNI);
-    boolean existeNumeroCuenta(int numeroCuenta);
-    boolean existeCBU(String cbu);
-    List<Cuenta> obtenerPorTipoCuenta(int tipoCuenta);
-    int contarCuentasPorCliente(String clienteDNI);
+ 
+ 
+//    List<Cuenta> obtenerPorClienteDNI(String clienteDNI);
+//    boolean existeNumeroCuenta(int numeroCuenta);
+//    boolean existeCBU(String cbu);
+//    List<Cuenta> obtenerPorTipoCuenta(int tipoCuenta);
+    int contarCuentasPorCliente(String clienteDNI);///judi 
+      boolean existeDNI(String dni) throws SQLException;///judi
 }

@@ -104,9 +104,13 @@ public class ClienteDAOimpl implements ClienteDAO {
     @Override
     public List<Cliente> listarClientes() throws Exception {
         List<Cliente> lista = new ArrayList<>();
-        String sql = "SELECT c.*, u.Nombre_Usu, u.Contrasenia_Usu " +
+        String sql = "SELECT c.*, u.Nombre_Usu, u.Contrasenia_Usu, " +
+        		" p.descripcion_Pr  AS DescripcionProvincia, " +
+        	    "l.descripcion_Loc AS DescripcionLocalidad " +
                 "FROM Clientes c " +
                 "INNER JOIN Usuarios u ON c.DNI_Cl = u.DNI_Usu " +
+                "INNER JOIN Provincias p ON c.IdProvincia_Cl = p.IdProvincias_Pr " +
+                "INNER JOIN  Localidades l ON c.IdLocalidad_Cl = l.IdLocalidad_Loc " +
                 "WHERE c.Estado_Cl = TRUE";
         try (Connection conn = Conexion.getConexion();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -121,8 +125,8 @@ public class ClienteDAOimpl implements ClienteDAO {
                 cliente.setNacionalidad(rs.getString("Nacionalidad_Cl"));
                 cliente.setFechaNacimiento(rs.getDate("FechaNacimiento_Cl").toLocalDate());
                 cliente.setDireccion(rs.getString("Direccion_Cl"));
-                cliente.setIdLocalidad(rs.getString("IdLocalidad_Cl"));
-                cliente.setIdProvincia(rs.getString("IdProvincia_Cl"));
+                cliente.setIdLocalidad(rs.getString("DescripcionLocalidad"));
+                cliente.setIdProvincia(rs.getString("DescripcionProvincia"));
                 cliente.setCorreoElectronico(rs.getString("CorreoElectronico_Cl"));
                 cliente.setTelefonos(rs.getString("Telefonos_Cl"));
                 cliente.setEstado(rs.getBoolean("Estado_Cl"));
