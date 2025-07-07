@@ -282,8 +282,11 @@ input[type="date"] {
 				<input	type="submit" value="Solicitud Prestamo"> 
 				</form>
 				
+				<form action="${pageContext.request.contextPath}/UsuarioClienteServlet" method="post">
+				<input type="hidden" name="accion" value="listarPagarPrestamo">
 				<input type="submit" value="Pagar Préstamo"> 
-				
+					</form>
+					
 				<form action="${pageContext.request.contextPath}/UsuarioClienteServlet" method="post">
     			<input type="hidden" name="accion" value="verInformacionPersonal" />
     			<input type="submit" value="Datos Personales" />

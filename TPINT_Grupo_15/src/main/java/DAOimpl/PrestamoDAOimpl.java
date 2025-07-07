@@ -12,6 +12,7 @@ import java.util.List;
 import DAO.Conexion;
 import DAO.PrestamoDAO;
 import entidad.Cuenta;
+import entidad.Cuota;
 import entidad.Prestamo;
 
 public class PrestamoDAOimpl implements PrestamoDAO {
@@ -65,6 +66,30 @@ public class PrestamoDAOimpl implements PrestamoDAO {
 			}
 		}
 		return listaP;
+
+	}
+	//me carga los prestamos en clientes para que paguen
+	public List<Cuota> listarPagarPrestamos() throws Exception {
+		List<Cuota> listaC = new ArrayList<>();
+		String sql = "select  FechaVencimiento_Cuo ,IDPrestamo_Cuo, NroCuenta_Cuo, NroCuota_Cuo, MontoCuota_Cuo from Cuotas   where Estado_Cuo ='D'";
+			
+		try (Connection conn = Conexion.getConexion();
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				Cuota c = new Cuota();
+				
+					c.setFechaVencimiento(rs.getDate("FechaVencimiento_Cuo"));
+				c.setIdPrestamo(rs.getInt("IDPrestamo_Cuo"));
+				c.setNroCuenta(rs.getInt("NroCuenta_Cuo"));
+				c.setNroCuota(rs.getInt("NroCuota_Cuo"));
+			
+				c.setMontoCuota(rs.getBigDecimal("MontoCuota_Cuo"));
+			
+				listaC.add(c);
+			}
+		}
+		return listaC;
 
 	}
 	

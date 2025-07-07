@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import entidad.Cuota;
 import entidad.Prestamo;
 import negocio.PrestamoNegocio;
 import negocioImpl.PrestamoNegocioImpl;
@@ -45,6 +46,8 @@ public class PrestamoServlet extends HttpServlet {
 	    			request.setAttribute("editarPrestamos", request.getParameter("numeroCuenta"));
 	    			listarPrestamos(request, response);
 	    			break;
+	    		
+	    			
 	            // REDIRIGIR A 'ListarPrestamo.jsp'
 	            default:
 	                response.sendRedirect("vistas/ListarPrestamo.jsp");
@@ -89,6 +92,9 @@ public class PrestamoServlet extends HttpServlet {
             throw new ServletException("Error al listar prestamos", e);
         }
     }
+ 
+    
+    
     
     private void autorizarPrestamo(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

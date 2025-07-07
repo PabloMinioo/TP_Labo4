@@ -74,28 +74,29 @@ CodUsuario_Usu INT AUTO_INCREMENT NOT NULL,
     CONSTRAINT PK_CodUsuario_Usu PRIMARY KEY (CodUsuario_Usu)
     
 );
--- 5. TABLA CUENTA
+-- 5. TABLA CUENTA depende de prestamo y cuenta
 
-
-
-CREATE TABLE Cuentas (
-
-NumeroCuenta_Cu INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    ClienteDNI_Cu VARCHAR(8) NOT NULL,
-    FechaCreacion_Cu DATE NOT NULL,
-    TipoCuenta_Cu INT NOT NULL,
-    CBU_Cu VARCHAR(22) UNIQUE NOT NULL,
-    SALDO_Cu DECIMAL(15,2) NOT NULL DEFAULT 0,
-    Estado_Cu BOOLEAN  DEFAULT TRUE,
-    CONSTRAINT FK_TipoCuenta FOREIGN KEY (TipoCuenta_Cu) REFERENCES TiposCuentas(IdTipoCuenta_Tc),
-    CONSTRAINT FK_CuentaCliente FOREIGN KEY (ClienteDNI_Cu) REFERENCES Clientes(DNI_Cl)
+CREATE TABLE Cuotas (
+    IdCuota_Cuo INT AUTO_INCREMENT PRIMARY KEY,
+    IDPrestamo_Cuo INT NOT NULL,
+    NroCuenta_Cuo INT UNSIGNED NOT NULL,
+    NroCuota_Cuo INT  NOT NULL,
+    FechaVencimiento_Cuo DATE NOT NULL,
+    MontoCuota_Cuo DECIMAL(15,2) NOT NULL,
+    Estado_Cuo CHAR(1) NOT NULL DEFAULT 'D',
+    CONSTRAINT chk_EstadoCuota CHECK (Estado_Cuo IN ('P', 'D')),
+    CONSTRAINT FK_CuotaPrestamo FOREIGN KEY (IDPrestamo_Cuo) REFERENCES Prestamos(IdPrestamo_Pr),
+    CONSTRAINT FK_CuotaCuenta FOREIGN KEY (NroCuenta_Cuo) REFERENCES Cuentas(NumeroCuenta_Cu)
 );
+
+
+
 
 -- 6. TABLA PRESTAMO
 CREATE TABLE Prestamos (
     IdPrestamo_Pr INT AUTO_INCREMENT PRIMARY KEY,
     DNICliente_Pr VARCHAR(8) NOT NULL,
-	NumeroCuenta_Pr int UNSIGNED  NOT NULL,
+	 int UNSIGNED  NOT NULL,
     Fecha_Pr DATE NOT NULL,
     ImporteTotal_Pr DECIMAL(15,2) NOT NULL,
     ImporteSolicitado_Pr DECIMAL(15,2) NOT NULL,
@@ -109,17 +110,19 @@ CREATE TABLE Prestamos (
 );
 
 -- 7. TABLA CUOTA (depende de PRESTAMO y CUENTA)
+
 CREATE TABLE Cuotas (
     IdCuota_Cuo INT AUTO_INCREMENT PRIMARY KEY,
     IDPrestamo_Cuo INT NOT NULL,
+ NroCuenta_Cuo INT NOT NULL,
     NroCuota_Cuo INT UNSIGNED  NOT NULL,
     FechaVencimiento_Cuo DATE NOT NULL,
-    FechaPago_Cuo DATE,
+ 
     MontoCuota_Cuo DECIMAL(15,2) NOT NULL,
-    Pagada_Cuo BOOLEAN DEFAULT FALSE,
-    CuentaPago_Cuo INT UNSIGNED,
+    Estado_Cuo CHAR(1) NOT NULL DEFAULT 'D',
+	CONSTRAINT chk_EstadoCuota CHECK (Estado_Cuo IN ('P', 'D')),
     CONSTRAINT FK_CuotaPrestamo FOREIGN KEY (IDPrestamo_Cuo) REFERENCES Prestamos(IdPrestamo_Pr),
-    CONSTRAINT FK_CuotaCuenta FOREIGN KEY (CuentaPago_Cuo) REFERENCES Cuentas(NumeroCuenta_Cu)
+    CONSTRAINT FK_CuotaCuenta FOREIGN KEY (NroCuenta_Cuo) REFERENCES Cuentas(NumeroCuenta_Cu)
 );
 
 -- 8. TABLA MOVIMIENTO (depende de CUENTA, TIPOS_MOVIMIENTO y PRESTAMO)
@@ -200,7 +203,7 @@ VALUES
     (4, 'Transferencia');
 
 
-    select * from prestamos;
+
     
 --TRIGGER PARA CARGAR TABLA MOVIMIENTOS 
 
@@ -230,12 +233,16 @@ DELIMITER ;
 
 -- trigger qeuse aaciona cuando aprobanos un prestamo, guarda el moviemeinto y ademas en la tabla cuentas le suma el importe que solicitaron
 
-DELIMITER //
+DELIMITER $$
 
 CREATE TRIGGER trg_AprobacionPrestamo AFTER UPDATE ON Prestamos
 FOR EACH ROW
 BEGIN
--- solo se activa si cambiamos a ´'A', si cambiamos a R rechazado no entra el trigger no cambia nada
+    DECLARE i INT DEFAULT 1;
+    DECLARE totalCuotas INT;
+    DECLARE fechaBase DATE;
+
+    -- solo se activa si cambiamos a ´'A', si cambiamos a R rechazado no entra el trigger no cambia nada
     IF OLD.Estado_Pr <> 'A' AND NEW.Estado_Pr = 'A' THEN
 
         -- Insertar movimiento en Movimientos
@@ -258,9 +265,32 @@ BEGIN
         SET SALDO_Cu = SALDO_Cu + NEW.ImporteSolicitado_Pr
         WHERE NumeroCuenta_Cu = NEW.NumeroCuenta_Pr;
 
+        -- Preparar variables para insertar cuotas
+        SET totalCuotas = CAST(NEW.Cuotas_Pr AS UNSIGNED);
+        SET fechaBase = NEW.Fecha_Pr;
+
+        -- Insertar cuotas en bucle
+        WHILE i <= totalCuotas DO
+            INSERT INTO Cuotas (
+                IDPrestamo_Cuo,
+                NroCuenta_Cuo,
+                NroCuota_Cuo,
+                FechaVencimiento_Cuo,
+                MontoCuota_Cuo,
+                Estado_Cuo
+            ) VALUES (
+                NEW.IdPrestamo_Pr,
+                NEW.NumeroCuenta_Pr,
+                i,
+                DATE_ADD(fechaBase, INTERVAL i MONTH),
+                NEW.MontoMensual_Pr,
+                'D'
+            );
+            SET i = i + 1;
+        END WHILE;
+
     END IF;
-END;
-//
+END$$
 
 DELIMITER ;
 
@@ -308,12 +338,7 @@ alter table Prestamos
 add constraint chk_Cuotas_valido
 check(Cuotas_Pr>0);
 
-update Prestamos set Estado_Pr='P' where idPrestamo_Pr=1 and Estado_Pr='A';
-update Prestamos set Estado_Pr='P' where idPrestamo_Pr=2 and Estado_Pr='A';
-update Prestamos set Estado_Pr='P' where idPrestamo_Pr=3 and Estado_Pr='A';
-update Prestamos set Estado_Pr='P' where idPrestamo_Pr=4 and Estado_Pr='A';
-update Prestamos set Estado_Pr='P' where idPrestamo_Pr=5 and Estado_Pr='A';
-update Prestamos set Estado_Pr='P' where idPrestamo_Pr=5 and Estado_Pr='A';
+
 
 
 

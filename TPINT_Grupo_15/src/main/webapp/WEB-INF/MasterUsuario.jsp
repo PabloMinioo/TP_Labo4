@@ -122,7 +122,10 @@
 <body>
 <header class="header">
         <div class="container">
-            <div class="logo">Bienvenido   </div>
+            <div class="logo">
+            
+            <a href="vistas/HomeCliente.jsp"  style="text-decoration: none; color: inherit;">  Bienvenido</a>
+               </div>
             
                      <!-- Mostrar el nombre del usuario desde la sesión -->
         <div class="user-info">

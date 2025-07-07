@@ -16,12 +16,14 @@ import javax.servlet.http.HttpSession;
 
 import entidad.Cliente;
 import entidad.Cuenta;
+import entidad.Cuota;
 import entidad.Prestamo;
 import entidad.Provincia;
 import negocio.CuentaNegocio;
 import negocio.PrestamoNegocio;
 import negocioImpl.CuentaNegocioImpl;
 import negocioImpl.PrestamoNegocioImpl;
+import negocio.PrestamoNegocio;
 import negocio.ClienteNegocio;
 import negocioImpl.ClienteNegocioImpl;
 
@@ -33,6 +35,7 @@ public class UsuarioClienteServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
 	  private final CuentaNegocio cuentaNegocio = new CuentaNegocioImpl();
+	  private final PrestamoNegocio  prestamoNegocio =new PrestamoNegocioImpl();
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -62,6 +65,7 @@ public class UsuarioClienteServlet extends HttpServlet {
 	        	  List<Cuenta> cuentas = cuentaNegocio.CargarDDlCuentas(dni);
 	        	  session.setAttribute("listaCuentas", cuentas);//le pongo session y no request porque sino cada vez que se actulaiza lapagina se pierden nlos DDL precargados
 	  	        request.getRequestDispatcher("/vistas/AltaPrestamo.jsp").forward(request, response);
+	  	    
 		    } catch (Exception e) {
 		        e.printStackTrace();
 		        throw new ServletException("Error cargando cuentas", e);
@@ -93,6 +97,12 @@ public class UsuarioClienteServlet extends HttpServlet {
 	            case "VerPrestamo":
 	            	  verPrestamo(request, response);
 	             break;
+	            case "listarPagarPrestamo":
+	            	  ListarPagarPrestamo(request, response);
+	             break;
+	             
+	             
+	             
 	            //info personal  
 	            case "verInformacionPersonal":
 	                verInformacionPersonal(request, response);  
@@ -104,6 +114,44 @@ public class UsuarioClienteServlet extends HttpServlet {
 	        }
 	        
 	}
+	
+	
+	 private void ListarPagarPrestamo(HttpServletRequest request, HttpServletResponse response)
+	            throws ServletException, IOException {
+		 
+		//cargo las ddl con el dni de lasession
+		  HttpSession session = request.getSession(false);
+		  String  dni = (session != null) ? (String ) session.getAttribute("dniUsuario") : null;
+
+	        if (dni == null) {
+	            response.sendRedirect(request.getContextPath() + "/vistas/Login.jsp");
+	            return;
+	        }
+	       
+	        ///esto hast aca
+	 //esto carga la ddl con las cuenta - saldo a debitar
+	        
+	        try {
+	        	  List<Cuenta> cuentas = cuentaNegocio.CargarDDlCuentas(dni);
+	        	  session.setAttribute("listaCuentas", cuentas);//le pongo session y no request porque sino cada vez que se actulaiza lapagina se pierden nlos DDL precargados
+	  	       
+	        	// METODO PARA LISTAR pretamos Para pagar con la D debe
+	        	   
+	        	        	 List<Cuota> listaPagarPrestamos = prestamoNegocio.listarPagarPrestamos();
+	        	            request.setAttribute("listaPagarPrestamos", listaPagarPrestamos);                  
+	        	           request.getRequestDispatcher("/vistas/PagarPrestamo.jsp").forward(request, response);
+	        	        } catch (Exception e) {
+	        	            e.printStackTrace();
+	        	            throw new ServletException("Error al listar prestamos", e);
+	        	        }
+	        	    
+	        	    }
+	      
+		 
+		 
+	 
+	 
+		 
 	
 	 private void verPrestamo(HttpServletRequest request, HttpServletResponse response)
 	            throws ServletException, IOException {

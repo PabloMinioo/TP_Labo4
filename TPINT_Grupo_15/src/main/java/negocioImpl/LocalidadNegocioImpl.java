@@ -14,9 +14,5 @@ public class LocalidadNegocioImpl implements LocalidadNegocio{
     public List<Localidad> listarPorProvincia(String provinciaId) throws Exception {
         return localidadDAO.obtenerPorProvincia(provinciaId);
     }
-    
-    public List<Localidad> obtenerTodasLocalidades() throws Exception{
-    	return localidadDAO.obtenerTodasLocalidades();
-    }
 	
 }

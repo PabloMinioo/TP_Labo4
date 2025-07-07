@@ -5,7 +5,6 @@ import DAOimpl.ClienteDAOimpl;
 import Excepciones.ContraseñaNoCoincideException;
 import entidad.Cliente;
 import negocio.ClienteNegocio;
-import Excepciones.CampoInvalidoException;
 import Excepciones.ClienteExistenteException;
 
 
@@ -71,45 +70,6 @@ public class ClienteNegocioImpl implements ClienteNegocio{
         return true;
     }
     
-    public void validarCliente(Cliente cliente) throws CampoInvalidoException {
-//        if (cliente.getDni() == null || cliente.getDni().trim().isEmpty())
-//            throw new CampoInvalidoException("El campo DNI está vacío.");
-
-        if (cliente.getCuil() == null || cliente.getCuil().trim().isEmpty())
-            throw new CampoInvalidoException("El campo CUIL está vacío.");
-
-        if (cliente.getNombre() == null || cliente.getNombre().trim().isEmpty())
-            throw new CampoInvalidoException("El campo Nombre está vacío.");
-
-        if (cliente.getApellido() == null || cliente.getApellido().trim().isEmpty())
-            throw new CampoInvalidoException("El campo Apellido está vacío.");
-
-        if (cliente.getSexo() == null || cliente.getSexo().trim().isEmpty())
-            throw new CampoInvalidoException("El campo Sexo está vacío.");
-
-        if (cliente.getNacionalidad() == null || cliente.getNacionalidad().trim().isEmpty())
-            throw new CampoInvalidoException("El campo Nacionalidad está vacío.");
-
-        if (cliente.getDireccion() == null || cliente.getDireccion().trim().isEmpty())
-            throw new CampoInvalidoException("El campo Dirección está vacío.");
-
-        if (cliente.getCorreoElectronico() == null || cliente.getCorreoElectronico().trim().isEmpty())
-            throw new CampoInvalidoException("El campo Correo Electrónico está vacío.");
-
-        if (cliente.getTelefonos() == null || cliente.getTelefonos().trim().isEmpty())
-            throw new CampoInvalidoException("El campo Teléfonos está vacío.");
-
-//        if (cliente.getNombreUsuario() == null || cliente.getNombreUsuario().trim().isEmpty())
-//            throw new CampoInvalidoException("El campo Usuario está vacío.");
-
-        if (cliente.getContraseniaUsuario() == null || cliente.getContraseniaUsuario().trim().isEmpty())
-            throw new CampoInvalidoException("El campo Contraseña está vacío.");
-
-        if (cliente.getIdProvincia() == null || cliente.getIdProvincia().trim().isEmpty())
-            throw new CampoInvalidoException("Debe seleccionar una Provincia.");
-
-        if (cliente.getIdLocalidad() == null || cliente.getIdLocalidad().trim().isEmpty())
-            throw new CampoInvalidoException("Debe seleccionar una Localidad.");
-
-    }
+    
+      
 }
