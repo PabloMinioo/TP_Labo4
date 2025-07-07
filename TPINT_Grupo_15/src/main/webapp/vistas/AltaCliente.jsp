@@ -68,6 +68,7 @@ input[type="submit"]:hover {
 		<form class="altaCliente" action="ClienteServlet" method="post">
 			<input type="hidden" name="accion" value="alta" />
 			<h2>Alta de Cliente</h2>
+			
 			<br> <label>DNI: </label><input type="text" name="dni" required><br>
 			<label>CUIL: </label><input type="text" name="cuil" required><br>
 			<label>Nombre: </label><input type="text" name="nombre" required><br>
@@ -179,7 +180,17 @@ El JavaScript recibe ese JSON y llena el <select> de localidades (ddlLocalidad) 
 			<label>Teléfonos: </label><input type="text" name="telefonos"><br>
 			<label>Usuario: </label><input type="text" name="usuario" required><br>
 			<label>Contraseña: </label><input type="password" name="password"
-				required><br> <input type="submit" name="btnAgregar"
+				required><br> 
+				<label>Confirmar Contraseña: </label><input type="password" name="confirmPassword"
+				required><br>
+				<% String mensajeError = (String) request.getAttribute("mensajeError");
+  				 if (mensajeError != null) { %>
+   			<div style="color: red; font-weight: bold; margin-top: 10px;">
+      			 <%= mensajeError %>
+  		 	</div>
+				<% } %>
+				
+				<input type="submit" name="btnAgregar"
 				value="Registrar">
 		</form>
 		<!-- Alertas de CLiente agreggado corecctamente o Error al argegar cliente -->

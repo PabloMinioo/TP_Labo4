@@ -24,29 +24,16 @@ public class ServletLogin extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// Mostrar la página de login
 		request.getRequestDispatcher("/vistas/Login.jsp").forward(request, response);
+		
 
+		
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// String ConsultaAdmin= "select * from usuarios where Nombre_Usu= ? and
-		// Contrasenia_Usu= ? and Rol_Usu='A'";
-		// String ConsultaCliente= "select * from usuarios where Nombre_Usu= ? and
-		// Contrasenia_Usu= ? and Rol_Usu='C'";
-
 		String Usuario = request.getParameter("usuario");
 		String Contrasenia = request.getParameter("contrasenia");
-
-		/*
-		 * if (Usuario == null || Usuario.trim().isEmpty() || Contrasenia == null ||
-		 * Contrasenia.trim().isEmpty()) { request.setAttribute("error",
-		 * "Por favor complete todos los campos.");
-		 * request.getRequestDispatcher("/vistas/Login.jsp").forward(request, response);
-		 * return; }
-		 */
-
 		// Validar usuario
 		Usuario usuarioValidado = usuarioDAO.validarUsuarioLogin(Usuario, Contrasenia);
 		if (usuarioValidado == null) {
@@ -57,6 +44,7 @@ public class ServletLogin extends HttpServlet {
 			HttpSession session = request.getSession();
 			session.setAttribute("usuario", usuarioValidado);
 			session.setAttribute("nombreUsuario", usuarioValidado.getNombreUsu());
+			session.setAttribute("dniUsuario", usuarioValidado.getDniUsu());//para usar despues vuando necesite consultar por el dni del que tiene iniciada la session
 			if (usuarioValidado.getRolUsu() == 'A') {
 				response.sendRedirect(request.getContextPath() + "/vistas/HomeAdministrador.jsp");
 			} else if (usuarioValidado.getRolUsu() == 'C') {

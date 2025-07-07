@@ -12,6 +12,17 @@ import entidad.Usuario;
 public class UsuarioDAOImpl implements UsuarioDAO {
 	@Override
 	public Usuario validarUsuarioLogin(String usuario, String contrasenia) {
+		
+		try {
+			validarCredenciales( usuario,  contrasenia);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		
 		System.out.println("=== INICIO validarUsuarioLogin ===");
 		System.out.println("Usuario recibido: " + usuario);
 		System.out.println("Contraseña recibida: " + contrasenia);
@@ -46,6 +57,43 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 		System.out.println("=== FIN validarUsuarioLogin - Retornando NULL ===");
 		return null;
 	}
+	
+	
+	//validacion 
+	 public  boolean validarCredenciales(String nombreUsuario, String contrasenia) throws Exception {
+	        if (nombreUsuario == null || contrasenia == null) {
+	            throw new Exception("Usuario y contraseña son requeridos");
+	        }
+	        
+	        if (nombreUsuario.trim().isEmpty() || contrasenia.trim().isEmpty()) {
+	            throw new Exception("Usuario y contraseña no pueden estar vacíos");
+	        }
+	        
+	        String sql = "SELECT COUNT(*) FROM Usuarios WHERE UPPER(Nombre_Usu) = UPPER(?) AND Contrasenia_Usu = ?";
+	        
+	        try (Connection conn = Conexion.getConexion(); 
+	             PreparedStatement ps = conn.prepareStatement(sql)) {
+	            
+	            ps.setString(1, nombreUsuario.trim());
+	            ps.setString(2, contrasenia);
+	            
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next() && rs.getInt(1) > 0) {
+	                    return true;
+	                }
+	            }
+	        }
+	        
+	        throw new Exception("Usuario o contraseña incorrectos");
+	    }
+	
+	
+	
+	
+	
+	
+	
+	
 
 	/// AGREGO UN USUARIO NUEVO ; PERO VIENE JUNTO CON EL ALTA DEL CLIENTE
 	@Override
@@ -75,3 +123,6 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 	    }
 	}
 }
+	
+
+	

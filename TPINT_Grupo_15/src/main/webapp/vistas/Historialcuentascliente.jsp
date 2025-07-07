@@ -5,6 +5,14 @@
 <head>
 <meta charset="UTF-8">
 <title>Historial de Movimientos</title>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#listadoHistorial').DataTable();
+	});
+</script>
 <style>
 body {
 	font-family: Arial;
@@ -106,7 +114,7 @@ tr:hover {
 
 	<h3>Historial de movimientos realizados en cuenta seleccionada:</h3>
 
-	<table>
+	<table id="listadoHistorial" class="display">
 		<thead>
 			<tr>
 				<th>Número de Movimiento</th>

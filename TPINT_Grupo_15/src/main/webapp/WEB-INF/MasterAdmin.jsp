@@ -24,7 +24,7 @@
             display: flex;
             color: white;
             padding: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             align-items: center;
     		justify-content: space-between;
         }
@@ -39,12 +39,7 @@
     		justify-content: space-between;
         }
 		
-		.logo {
-		    color: white;
-		    font-size: 1.2rem;
-		    font-weight: bold;
-		}
-		
+	
         
         .nav-menu {
 		    list-style: none;
@@ -110,17 +105,20 @@
 			background-color: #c0392b;
 		}
 		.user-info {
-		    color: white;
-		    font-size: 14px;
-		    margin-left: 20px;
+		  color: white;
+		    font-size: 1.2rem;
+		    font-weight: bold;
+		     margin-right: 40px; 
 		}
+			
+		
     </style>
 </head>
 <body>
 
   <header class="header">
         <div class="container">
-            <div class="logo">Vista Administrador</div>
+          
             
             <!-- Mostrar el nombre del usuario desde la sesión -->
         <div class="user-info">
@@ -131,10 +129,10 @@
                 <ul class="nav-menu">
 					<li><a href="<%= request.getContextPath() %>/ClienteServlet?Param=1&accion=listar">ABML Cliente</a></li>
 					<li><a href="<%= request.getContextPath() %>/CuentaServlet?accion=listar">ABML Cuentas</a></li>
-                    <li><a href="#">Préstamos</a></li>
+                    <li><a href="<%= request.getContextPath() %>/PrestamoServlet?accion=listarPrestamoP">Préstamos</a></li>
                     <li><a href="#">Informes</a></li>
 					 <li class="logout-item">
-				        <form action="LogoutServlet" method="post">
+				        <form action="<%= request.getContextPath() %>/LogoutServlet" method="post">
 				            <input type="submit" value="Cerrar sesión" name="btnCerrarSesion">
 				        </form>
 				    </li>
@@ -143,11 +141,7 @@
         </div>
     </header>
     
-    <main class="main-content">
-        <div class="container">
-            <!-- El contenido específico de cada página se insertará aquí -->
-        </div>
-    </main>
+    
  
 </body>
 </html>

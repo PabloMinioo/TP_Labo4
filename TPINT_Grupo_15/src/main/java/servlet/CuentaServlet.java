@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -10,9 +11,11 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import DAO.CuentaDAO;
 import DAOimpl.CuentaDAOImpl;
+import entidad.Cliente;
 import entidad.Cuenta;
 import negocio.CuentaNegocio;
 import negocioImpl.CuentaNegocioImpl;
@@ -42,17 +45,23 @@ public class CuentaServlet extends HttpServlet {
 		}
 		// SEGUN LA ACCION, REDIRIGIMOS AL METODO CORRESPONDIENTE
 		switch (action) {
-			// MOSTRAR LISTADO DE CUENTAS
-			case "listar":
-				listarCuentas(request, response);
-				break;
-	        // REDIRIGIR A 'AltaCuenta.jsp'
-			default:
-				response.sendRedirect("vistas/AltaCuenta.jsp");
-				break;
+		// MOSTRAR LISTADO DE CUENTAS
+		case "listar":
+			listarCuentas(request, response);
+			break;
+			
+		// EDITAR UN CLIENTE MEDIANTE SU DNI
+		case "modificar":
+			request.setAttribute("editarCuenta", request.getParameter("numeroCuenta"));
+			listarCuentas(request, response);
+			break;
+		// REDIRIGIR A 'AltaCuenta.jsp'
+		default:
+			response.sendRedirect("vistas/AltaCuenta.jsp");
+			break;
 		}
 	}
-	
+
 	// PETICIONES POST:
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -60,20 +69,28 @@ public class CuentaServlet extends HttpServlet {
 		String action = request.getParameter("accion");
 		// SEGUN LA ACCION, REDIRIGIMOS AL METODO CORRESPONDIENTE
 		switch (action) {
-			// DAR DE ALTA UNA CUENTA
-			case "alta":
-				altaCuenta(request, response);
-				break;
-			// ELIMINAR UNA CUENTA
-			case "eliminar":
-				eliminarCuenta(request, response);
-				break;
-            // POR DEFECTO, LISTAMOS TODAS LAS CUENTAS
-            default:
-                response.sendRedirect("CuentaServlet?accion=listar");
-                break;
+		// DAR DE ALTA UNA CUENTA
+		case "alta":
+			altaCuenta(request, response);
+			break;
+		// ELIMINAR UNA CUENTA
+		case "eliminar":
+			eliminarCuenta(request, response);
+			break;
+		// MODIFICAR UN CLIENTE
+		case "modificar":
+			modificarCuenta(request, response);
+			break;
+		// POR DEFECTO, LISTAMOS TODAS LAS CUENTAS
+		default:
+			response.sendRedirect("CuentaServlet?accion=listar");
+			break;
 		}
 	}
+
+	
+	
+	
 	
 	// METODO PARA LISTAR CUENTAS
 	private void listarCuentas(HttpServletRequest request, HttpServletResponse response)
@@ -88,39 +105,59 @@ public class CuentaServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
-	
-    // METODO PARA DAR DE ALTA UNA CUENTA
+
+	// METODO PARA DAR DE ALTA UNA CUENTA
 	private void altaCuenta(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
+		// OBTENEMOS LOS VALORES DEL JSP
+		String dni = request.getParameter("cliente");
+		String fechaStr = request.getParameter("fechaCreacion");
+		String tipoCuentaStr = request.getParameter("tipoCuenta");
+		int tipoCuenta = Integer.parseInt(tipoCuentaStr);
+		double saldo = 10000.00;
+		LocalDate fechaCreacion = LocalDate.parse(fechaStr);
+		// CREAMOS UN OBJETO CUENTA
+		Cuenta cuenta = new Cuenta();
+		// CARGAMOS AL OBJETO 'CUENTA' LOS VALORES DEL JSP
+		cuenta.setClienteDNI(dni);
+		cuenta.setTipoCuenta(tipoCuenta);
+		cuenta.setFechaCreacion(fechaCreacion);
+		cuenta.setSaldo(saldo);
+		CuentaNegocio negocio = new CuentaNegocioImpl();
 		try {
-			// OBTENEMOS LOS VALORES DEL JSP
-			String clienteDNI = request.getParameter("clienteDNI");
-			int tipoCuenta = Integer.parseInt(request.getParameter("tipoCuenta"));
-			double saldoInicial = Double.parseDouble(request.getParameter("saldoInicial"));
-			
-			// CREAMOS UN OBJETO CUENTA
-			Cuenta cuenta = new Cuenta();
-			
-			// CARGAMOS AL OBJETO 'CUENTA' LOS VALORES DEL JSP
-			cuenta.setClienteDNI(clienteDNI);
-			cuenta.setTipoCuenta(tipoCuenta);
-			cuenta.setSaldo(saldoInicial);
-			cuenta.setFechaCreacion(LocalDate.now());
-
-			// GUARDAMOS LOS REGISTROS EN LA BD
-			boolean exito = cuentaNegocio.crearCuenta(cuenta);
-			if (exito) {
-				request.setAttribute("mensaje", "Cuenta creada exitosamente");
-				request.setAttribute("tipoMensaje", "success");
+			boolean ok = negocio.crearCuenta(cuenta);
+			if (ok) {
+				request.setAttribute("mensaje", "CUENTA CREADA  CON EXITO.");
+				request.getRequestDispatcher("/vistas/AltaCuenta.jsp").forward(request, response);
 			} else {
-				request.setAttribute("mensaje", "Error al crear la cuenta");
-				request.setAttribute("tipoMensaje", "error");
+				request.setAttribute("mensaje", "El DNI NOO EXISTE COMO CLIENTE O EL CLIENTE YA CUENTA CON 3 CUENTAS.");
+				request.getRequestDispatcher("/vistas/AltaCuenta.jsp").forward(request, response);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			response.sendRedirect("error.jsp");
+		}
+	}
+
+	private void modificarCuenta(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+			Cuenta cuenta = new Cuenta();
+			String numeroCuentaStr = request.getParameter("numeroCuenta");
+			System.out.println("Modificar Cuenta: numeroCuenta=" + numeroCuentaStr);
+			cuenta.setNumeroCuenta(Integer.parseInt(request.getParameter("numeroCuenta")));
+			cuenta.setFechaCreacion(LocalDate.parse(request.getParameter("fechaCreacion")));
+			cuenta.setTipoCuenta(Integer.parseInt(request.getParameter("tipoCuenta")));
+			boolean ok = cuentaNegocio.modificarCuenta(cuenta);
+			if (ok) {
+				response.sendRedirect("CuentaServlet?accion=listar&modificado=true");
+			} else {
+				response.sendRedirect("CuentaServlet?accion=listar&modificado=false");
 			}
 
 		} catch (Exception e) {
-			request.setAttribute("mensaje", "Error: " + e.getMessage());
-			request.setAttribute("tipoMensaje", "error");
+			e.printStackTrace();
+			response.sendRedirect("CuentaServlet?accion=listar&modificado=false");
 		}
 	}
 
@@ -139,8 +176,8 @@ public class CuentaServlet extends HttpServlet {
 			}
 
 		} catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect("CuentaServlet?accion=listar&error=true");
+			e.printStackTrace();
+			response.sendRedirect("CuentaServlet?accion=listar&error=true");
 		}
 
 		listarCuentas(request, response);

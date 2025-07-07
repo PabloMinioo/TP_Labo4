@@ -1,10 +1,24 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8"
+    import="java.util.List,entidad.Prestamo"
+    %>
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Listar Prestamos</title>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#listadoPrestamos').DataTable();
+		language:{
+	           emptyTable:"¡No hay préstamos pendientes!"
+	       }
+	});
+</script>
 <style>
 
 body {
@@ -79,17 +93,18 @@ tr:hover {
 	transition: background-color 0.3s ease;
 }
 
-.btn-modificar {
-	background-color: #f1c40f;
-	color: #2c3e50;
+.btn-aprobar {
+	background-color: #49c82b;
+	color: #fff;
 }
 
-.btn-modificar:hover {
-	background-color: #d4ac0d;
+.btn-aprobar:hover {
+	background-color: #209e03;
 }
 
 .btn-eliminar {
 	background-color: #e74c3c;
+	color: #fff;
 }
 
 .btn-eliminar:hover {
@@ -101,41 +116,81 @@ tr:hover {
 	<jsp:include page="/WEB-INF/MasterAdmin.jsp" />
 
 	<div class="listado-wrapper">
-		<table>
+			<br>
+				<br>
+	<h2>Prestamos Pendientes de Autorización</h2>
+	<br>
+		<br>
+		<table id="listadoPrestamos" class="display">
 			<thead>
 				<tr>
-					
+					<th>ID</th>
 				<th>Numero Cuenta</th>
                 <th>DNI Cliente</th>
                 <th>Fecha alta </th>
-                <th>Tipo de Cuenta</th>
-                <th>CBU</th>
+             
                 <th>Prestamo Total</th>
-                <th>cuotas pendientes</th>
-                <th>cuota</th>
+                <th>cuotas</th>
+                <th>precio cuota</th>
                 <th>Acciones</th>
                 
 				</tr>
 		</thead>
 			<tbody>
-		        <tr>
-		            <td>12345</td>
-		            <td>30123456</td>
-		            <td>2024-06-01</td>
-		            <td>Cuenta Corriente</td>
-		            <td>1234567890123456789012</td>
-		            <td>$100,000</td>
-		            <td>10</td>
-		            <td>$10,000</td>
-		            <td>
-		                <div class="acciones-btn">
-		                    <button type="submit" class="btn-accion btn-modificar">Autorizar</button>
-		                    <button type="submit" class="btn-accion btn-eliminar">Rechazar</button>
-		                </div>
-		            </td>
-		        </tr>
-    	</tbody>
-	</table>
-	</div>
+			<!-- EJEMPLO DE COMO SE VERIA EL LISTADO de prestamos pendientes -->
+				
+				<% 
+ 				String editarPrestamos=(String) request.getAttribute("editarPrestamos");
+				
+				List<Prestamo> listaPrestamos = (List<Prestamo>) request.getAttribute("listaPrestamos");
+				
+				if (listaPrestamos != null ) {
+					
+					for (Prestamo p : listaPrestamos) {
+							boolean enEdicion = editarPrestamos != null && Integer.parseInt(editarPrestamos) == p.getIdPrestamo();
+				%> 
+ 
+ 				<tr>
+ 				
+ 			<td><%= p.getIdPrestamo() %></td>
+            <td><%= p.getNumeroCuenta() %></td>
+            <td><%= p.getDniCliente() %></td>
+            <td><%= p.getFecha() %></td>
+            <td><%= p.getImporteSolicitado() %></td>
+            <td><%= p.getCuotas() %></td>
+            <td><%= p.getMontoMensual() %></td>
+					 <td>
+							<!--Formulario  para apobar  -->
+						<form action="PrestamoServlet" method="post" style="display: inline;">
+ 							<input type="hidden" name="idPrestamo"value="<%= p.getIdPrestamo() %>"> 
+							 <input type="hidden"name="accion" value="autorizar"> 
+							 <button type="submit" class="btn-accion btn-aprobar">Aprobar</button> 
+							 
+						</form> 
+						
+ 						<!-- Formulario  para rechazar  -->
+ 						<form action="PrestamoServlet" method="post" style="display: inline;"> 
+							<input type="hidden" name="idPrestamo" value="<%= p.getIdPrestamo() %>">
+							<input type="hidden" name="accion" value="rechazar">
+ 							<button type="submit"  class="btn-accion btn-eliminar">Rechazar</button> 
+ 						</form>
+					</td> 
+				</tr> 
+				
+ 				<%			
+                   } // fin for
+	          } // fin if
+				 %> 
+    </tbody>
+  </table>
+</div>
+<!-- 		mensaje de erro -->
+
+ <% if (request.getAttribute("error") != null) { %>
+   				 <label style="color: red;"><%= request.getAttribute("error") %></label>
+				<% } %>
+
+
 </body>
-</html>
+</html>			
+			 

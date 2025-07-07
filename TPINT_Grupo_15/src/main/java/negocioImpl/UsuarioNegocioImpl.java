@@ -28,4 +28,8 @@ public class UsuarioNegocioImpl implements UsuarioNegocio {
    public boolean actualizarPassword(String dni, String nuevaPassword) throws Exception {
        return usuarioDAO.actualizarPassword(dni, nuevaPassword);
    }
+   @Override
+    public boolean validarCredenciales(String nombreUsuario, String contrasenia) throws Exception{
+	   return usuarioDAO.validarCredenciales(nombreUsuario, contrasenia);
+   }
 }

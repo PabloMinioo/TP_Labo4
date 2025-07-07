@@ -30,20 +30,19 @@
         }
         
         .container {
-       		position: relative;
-       		display: flex;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            align-items: center;
-    		justify-content: space-between;
+       		  position: relative;
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  align-items: center;     
+    		
         }
+		.container nav{
+  margin-left: auto;
+}
 		
-		.logo {
-		    color: white;
-		    font-size: 1.2rem;
-		    font-weight: bold;
-		}
+		
 		
         .nav-menu {
 		    list-style: none;
@@ -100,7 +99,7 @@
 		    color: white;
 		    border: none;
 		    padding: 8px 14px;
-		    font-size: 13px;
+		    font-size: 15px;
 		    border-radius: 5px;
 		    cursor: pointer;
 		    transition: background-color 0.3s ease;
@@ -109,16 +108,21 @@
 			background-color: #c0392b;
 		}
 		.user-info {
-		    color: white;
-		    font-size: 14px;
-		    margin-left: 20px;
+		 font-size: 30px;
+		   margin-left: 20px;
+  margin-right: 20px;
+		}
+		
+		.logo{
+		 font-size: 30px;
+		
 		}
     </style>
 </head>
 <body>
 <header class="header">
         <div class="container">
-            <div class="logo">Vista Cliente</div>
+            <div class="logo">Bienvenido   </div>
             
                      <!-- Mostrar el nombre del usuario desde la sesión -->
         <div class="user-info">
@@ -126,13 +130,9 @@
         </div>
             <nav>
                 <ul class="nav-menu">
-                    <li><a href="#">Cuentas</a></li>
-                    <li><a href="#">Información Personal</a></li>
-                    <li><a href="#">Transferencia</a></li>
-                    <li><a href="#">Pedido Préstamo</a></li>
-                    <li><a href="#">Pago Préstamo</a></li>
+               
 					<li class="logout-item">
-				        <form action="LogoutServlet" method="post">
+			        <form action="<%= request.getContextPath() %>/LogoutServlet" method="post">
 				            <input type="submit" value="Cerrar sesión" name="btnCerrarSesion">
 				        </form>
 				    </li>
@@ -143,11 +143,7 @@
         </div>
     </header>
     
-    <main class="main-content">
-        <div class="container">
-            <!-- El contenido específico de cada página se insertará aquí -->
-        </div>
-    </main>
+   
 
 </body>
 </html>

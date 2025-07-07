@@ -12,20 +12,22 @@ public class Cliente {
     private LocalDate fechaNacimiento;
     private String direccion;
     private String idLocalidad;
+    private String descripcionLocalidad;
     private String idProvincia;
+    private String descripcionProvincia;
     private String correoElectronico;
     private String telefonos;
     private String nombreUsuario;
     private String contraseniaUsuario;
     private boolean estado;
     
-    // Constructor vacío
+    // CONSTRUCTOR VACIO
     public Cliente() {
         this.estado = true;
         this.fechaNacimiento = LocalDate.now();
     }
 
-    // Constructor con parámetros
+    // CONSTRUCTOR CON PARAMETROS
     public Cliente(String dni, String cuil, String nombre, String apellido, String sexo,
                    String nacionalidad, LocalDate fechaNacimiento, String direccion,
                    String idLocalidad, String idProvincia, String correoElectronico,
@@ -45,7 +47,7 @@ public class Cliente {
         this.estado = estado;
     }
 
-    // Getters y Setters
+    // GETTERS Y SETTERS
     public String getDni() { return dni; }
     public void setDni(String dni) { this.dni = dni; }
 
@@ -73,8 +75,14 @@ public class Cliente {
     public String getIdLocalidad() { return idLocalidad; }
     public void setIdLocalidad(String idLocalidad) { this.idLocalidad = idLocalidad; }
 
+    public String getDescripcionLocalidad() { return descripcionLocalidad; }
+    public void setDescripcionLocalidad(String descripcionLocalidad) { this.descripcionLocalidad = descripcionLocalidad; }
+    
     public String getIdProvincia() { return idProvincia; }
     public void setIdProvincia(String idProvincia) { this.idProvincia = idProvincia; }
+    
+    public String getDescripcionProvincia() { return descripcionProvincia; }
+    public void setDescripcionProvincia(String descripcionProvincia) { this.descripcionProvincia = descripcionProvincia; }
 
     public String getCorreoElectronico() { return correoElectronico; }
     public void setCorreoElectronico(String correoElectronico) { this.correoElectronico = correoElectronico; }

@@ -13,7 +13,7 @@ public class Conexion {
 	            // Driver correcto para 5.1.47
 	            Class.forName("com.mysql.jdbc.Driver");
 	            
-	            String url = "jdbc:mysql://localhost:3306/TP_INT";
+	            String url = "jdbc:mysql://localhost:3306/TP_INT?useSSL=false";
 	            String user = "root";
 	            String password = "root";
 	            

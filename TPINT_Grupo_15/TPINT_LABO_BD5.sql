@@ -37,10 +37,12 @@ CREATE TABLE TiposCuentas (
 );
 
 CREATE TABLE TiposMovimientos (
-    IdTipoMovimiento_Tm INT AUTO_INCREMENT PRIMARY KEY,
-    NombreTipo_Tm VARCHAR(30) NOT NULL,
-    Descripcion_Tm VARCHAR(100)
+    IdTipoMovimiento_Tm INT NOT NULL PRIMARY KEY,
+      Descripcion_Tm VARCHAR(50)
 );
+
+
+
 
 -- 3. TABLA CLIENTES: Datos del Cliente
 CREATE TABLE Clientes (
@@ -63,7 +65,6 @@ CREATE TABLE Clientes (
 
 -- 4. TABLA USUARIOS:
 CREATE TABLE Usuarios (
-
 CodUsuario_Usu INT AUTO_INCREMENT NOT NULL,
     DNI_Usu CHAR(8),
     Nombre_Usu VARCHAR(8),
@@ -129,15 +130,13 @@ CREATE TABLE Movimientos (
     Importe_Mv DECIMAL(10,2) NOT NULL,
     NumeroCuenta_Mv INT UNSIGNED NULL,
     IdTipoMovimiento_Mv INT NOT NULL,
-    SaldoAnterior_Mv DECIMAL(15,2) NOT NULL,
-    SaldoPosterior_Mv DECIMAL(15,2) NOT NULL,
-    CuentaDestino_Mv INT UNSIGNED NULL,
-    IDPrestamoRelacionado_Mv INT NULL,
-    CONSTRAINT FK_MovimientoCuenta FOREIGN KEY (NumeroCuenta_Mv) REFERENCES Cuentas(NumeroCuenta_Cu),
-    CONSTRAINT FK_MovimientoTipo FOREIGN KEY (IdTipoMovimiento_Mv) REFERENCES TiposMovimientos(IdTipoMovimiento_Tm),
-    CONSTRAINT FK_MovimientoCuentaDestino FOREIGN KEY (CuentaDestino_Mv) REFERENCES Cuentas(NumeroCuenta_Cu),
-    CONSTRAINT FK_MovimientoPrestamo FOREIGN KEY (IDPrestamoRelacionado_Mv) REFERENCES Prestamos(IdPrestamo_Pr)
+     CONSTRAINT FK_MovimientoCuenta FOREIGN KEY (NumeroCuenta_Mv) REFERENCES Cuentas(NumeroCuenta_Cu),
+    CONSTRAINT FK_MovimientoTipo FOREIGN KEY (IdTipoMovimiento_Mv) REFERENCES TiposMovimientos(IdTipoMovimiento_Tm)
+   
+  
 );
+
+
 
 -- insertar datos
 INSERT INTO Provincias (IdProvincias_Pr, descripcion_Pr) VALUES
@@ -185,12 +184,142 @@ INSERT INTO TiposCuentas ( IdTipoCuenta_Tc, NombreTipo_Tc) VALUES
 (1,'Cuenta Corriente'),
 (2,'Caja de Ahorro');
 
+
 -- acordarcequepara insertar ceuntas , siempre tiene que existir el cliente
 INSERT INTO Cuentas (ClienteDNI_Cu, FechaCreacion_Cu, TipoCuenta_Cu, CBU_Cu, SALDO_Cu) VALUES
 ('12345678', '2025-06-01', 1, '0001000000000000000001', 15000.00),
 ('23456789', '2025-06-05', 2, '0001000000000000000002', 8000.50),
 ('34567890', '2025-06-10', 1, '0001000000000000000003', 12000.75);
 
+
+INSERT INTO TiposMovimientos (IdTipoMovimiento_Tm, Descripcion_Tm)
+VALUES 
+    (1, 'Alta de cuenta'),
+    (2, 'Alta de préstamo'),
+    (3, 'Pago de préstamo'),
+    (4, 'Transferencia');
+
+
+    select * from prestamos;
+    
+--TRIGGER PARA CARGAR TABLA MOVIMIENTOS 
+
+DELIMITER $$
+
+CREATE TRIGGER tr_cuentas_despues_insert
+AFTER INSERT ON Cuentas
+FOR EACH ROW
+BEGIN
+  INSERT INTO Movimientos (
+    Fecha_Mv,
+    Detalle_Mv,
+    Importe_Mv,
+    NumeroCuenta_Mv,
+    IdTipoMovimiento_Mv
+  )
+  VALUES (
+    CURDATE(),
+    'positivo',
+    NEW.Saldo_Cu,
+    NEW.NumeroCuenta_Cu,
+    1
+  );
+END$$
+
+DELIMITER ;
+
+-- trigger qeuse aaciona cuando aprobanos un prestamo, guarda el moviemeinto y ademas en la tabla cuentas le suma el importe que solicitaron
+
+DELIMITER //
+
+CREATE TRIGGER trg_AprobacionPrestamo AFTER UPDATE ON Prestamos
+FOR EACH ROW
+BEGIN
+-- solo se activa si cambiamos a ´'A', si cambiamos a R rechazado no entra el trigger no cambia nada
+    IF OLD.Estado_Pr <> 'A' AND NEW.Estado_Pr = 'A' THEN
+
+        -- Insertar movimiento en Movimientos
+        INSERT INTO Movimientos (
+            Fecha_Mv,
+            Detalle_Mv,
+            Importe_Mv,
+            NumeroCuenta_Mv,
+            IdTipoMovimiento_Mv
+        ) VALUES (
+            CURDATE(),
+            'positivo',
+            NEW.ImporteSolicitado_Pr,
+            NEW.NumeroCuenta_Pr,
+            2
+        );
+
+        -- Actualizar saldo en Cuentas
+        UPDATE Cuentas
+        SET SALDO_Cu = SALDO_Cu + NEW.ImporteSolicitado_Pr
+        WHERE NumeroCuenta_Cu = NEW.NumeroCuenta_Pr;
+
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+-- VALIDACIONES TABLA CUENTAS
+
+ALTER TABLE CUENTAS
+ADD constraint chk_saldo_valido
+check (SALDO_Cu >0);
+
+
+
+
+-- VALIDACIONES TABLA CUOTAS
+alter table Cuotas
+add constraint chk_IDPrestamo_valido
+check(IDPrestamo_Cuo>0);
+
+alter table Cuotas
+add constraint chk_MontoCuota_valido
+check(MontoCuota_Cuo>0);
+
+alter table Cuotas
+add constraint chk_CuentaPago_valido
+check(CuentaPago_Cuo>0);
+
+
+-- VALIDACIONES TABLA PRESTAMOS
+alter table  Prestamos
+add constraint chk_importeTotal_valido
+check(ImporteTotal_Pr >0);
+
+alter table  Prestamos
+add constraint chk_importeSolicitado_valido
+check(ImporteSolicitado_Pr >0);
+
+alter table Prestamos 
+add constraint chk_PlazoPagoMeses_valido
+check(PlazoPagoMeses_Pr>0);
+
+alter table Prestamos 
+add constraint chk_MontoMensual_valido
+check(MontoMensual_Pr>0);
+
+alter table Prestamos 
+add constraint chk_Cuotas_valido
+check(Cuotas_Pr>0);
+
+update Prestamos set Estado_Pr='P' where idPrestamo_Pr=1 and Estado_Pr='A';
+update Prestamos set Estado_Pr='P' where idPrestamo_Pr=2 and Estado_Pr='A';
+update Prestamos set Estado_Pr='P' where idPrestamo_Pr=3 and Estado_Pr='A';
+update Prestamos set Estado_Pr='P' where idPrestamo_Pr=4 and Estado_Pr='A';
+update Prestamos set Estado_Pr='P' where idPrestamo_Pr=5 and Estado_Pr='A';
+update Prestamos set Estado_Pr='P' where idPrestamo_Pr=5 and Estado_Pr='A';
+
+
+
+select * from  Prestamos;
+select* from movimientos;
+select * from cuentas;
 select * from cuentas;
 
 select * from Usuarios;

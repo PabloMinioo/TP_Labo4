@@ -11,22 +11,39 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import DAO.ClienteDAO;
+import DAO.ProvinciaDAO;
+import DAO.LocalidadDAO;
 import DAOimpl.ClienteDAOimpl;
+import DAOimpl.LocalidadDAOImpl;
+import DAOimpl.ProvinciaDAOImpl;
+import Excepciones.ContraseñaNoCoincideException;
 import entidad.Cliente;
-import entidad.Usuario;
+import entidad.Prestamo;
+import entidad.Provincia;
+import entidad.Localidad;
+import entidad.Usuario;	
 import negocio.ClienteNegocio;
 import negocio.UsuarioNegocio;
+import negocio.LocalidadNegocio;
+import negocio.ProvinciaNegocio;
+import negocioImpl.LocalidadNegocioImpl;
+import negocioImpl.ProvinciaNegocioImpl;
 import negocioImpl.ClienteNegocioImpl;
 import negocioImpl.UsuarioNegocioImpl;
+import Excepciones.CampoInvalidoException;
+import Excepciones.ClienteExistenteException;
 
 @WebServlet("/ClienteServlet")
 public class ClienteServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     // INTANCIAMOS LAS CAPAS
-    private ClienteDAO clienteDAO = new ClienteDAOimpl();
+//    private ClienteDAO clienteDAO = new ClienteDAOimpl();
     private ClienteNegocio clienteNegocio = new ClienteNegocioImpl();
     private UsuarioNegocio usuarioNegocio = new UsuarioNegocioImpl();
+    private ProvinciaNegocio provinciaNegocio = new ProvinciaNegocioImpl();
+    private LocalidadNegocio localidadNegocio = new LocalidadNegocioImpl();
+//    private PrestamoNegocio prestamoNegocio = new PrestamoNegocioImpl();
 
     // CONSTRUCTOR VACIO
     public ClienteServlet() {
@@ -50,9 +67,15 @@ public class ClienteServlet extends HttpServlet {
                 break;
             // EDITAR UN CLIENTE MEDIANTE SU DNI
             case "modificar":
-            	request.setAttribute("editarDni", request.getParameter("dni"));
-            	listarClientes(request, response);
+            	String dni = request.getParameter("dni");
+                request.setAttribute("editarDni", dni);
+                listarClientes(request, response);
             	break;
+            	//Muestra listado los prestamos que estan con estado pendientes
+    		case "listarPrestamoP":
+    			request.setAttribute("editarPrestamos", request.getParameter("numeroCuenta"));
+    			listarPrestamos(request, response);
+    			break;
             // REDIRIGIR A 'AltaCliente.jsp'
             default:
                 response.sendRedirect("vistas/AltaCliente.jsp");
@@ -69,7 +92,20 @@ public class ClienteServlet extends HttpServlet {
         switch (action) {
         	// DAR DE ALTA UN CLIENTE
             case "alta":
-                altaCliente(request, response);             
+            	try {
+                    Cliente cliente = obtenerClienteDesdeJSP(request); // suponiendo que ya hacés esto
+                    clienteNegocio.validarCliente(cliente);
+                    clienteNegocio.agregarCliente(cliente);
+
+                    response.sendRedirect("ClienteServlet?accion=listar");
+                } catch (CampoInvalidoException e) {
+                    request.setAttribute("errorMensaje", e.getMessage());
+                    request.getRequestDispatcher("/vistas/AltaCliente.jsp").forward(request, response);
+                } catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+//                altaCliente(request, response);             
                 break;
             // ELIMINAR UN CLIENTE
             case "eliminar":
@@ -77,7 +113,28 @@ public class ClienteServlet extends HttpServlet {
                 break;
             // MODIFICAR UN CLIENTE
             case "modificar":
-                modificarCliente(request, response);
+                try {
+                    Cliente cliente = obtenerClienteDesdeJSP(request);
+                    clienteNegocio.validarCliente(cliente); // tu lógica, puede lanzar excepción
+                    clienteNegocio.modificarCliente(cliente);
+                    response.sendRedirect("ClienteServlet?accion=listar");
+
+                } catch (CampoInvalidoException e) {
+                    // Si hubo error, volvés al listado con el cliente en modo edición
+                    request.setAttribute("errorMensaje", e.getMessage());
+                    request.setAttribute("editarDni", request.getParameter("dni")); // para que quede en edición
+                    listarClientes(request, response); // recarga tabla con mensaje
+                } catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+//                modificarCliente(request, response);
+                break;
+            case "autoriza":
+                autorizarPrestamo(request, response);
+                break;
+            case "rechaza":
+            	rechazaPrestamo(request, response);
                 break;
             // POR DEFECTO, LISTAMOS TODOS LOS CLIENTES
             default:
@@ -90,62 +147,111 @@ public class ClienteServlet extends HttpServlet {
     private void listarClientes(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            // OBTENEMOS LOS CLIENTES
             List<Cliente> listaClientes = clienteNegocio.listarClientes();
+
+            // AGREGAMOS LAS PROVINCIAS PARA EL DESPEGABLE
+            List<Provincia> listaProvincias = provinciaNegocio .listarProvincias();
+
+            // AGREGAMOS LAS LOCALIDADES PARA EL DESPEGABLE
+            List<Localidad> listaLocalidades = localidadNegocio.obtenerTodasLocalidades();
+
+            // ENVIAMOS LOS DATOS AL JSP
             request.setAttribute("listaClientes", listaClientes);
-            System.out.println("Clientes recuperados: " + listaClientes);
+            request.setAttribute("provincias", listaProvincias);
+            request.setAttribute("localidades", listaLocalidades);
             RequestDispatcher rd = request.getRequestDispatcher("/vistas/ListarClientes.jsp");
             rd.forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ServletException("Error al listar clientes", e); // MUY IMPORTANTE
+            throw new ServletException("Error al listar clientes", e);
         }
     }
-
-    // METODO PARA DAR DE ALTA UN CLIENTE
-    private void altaCliente(HttpServletRequest request, HttpServletResponse response)
+    
+    
+   // METODO PARA LISTAR pretamos P
+    Prestamo Prestamo= new Prestamo();
+    
+    private void listarPrestamos(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-        	// CREAMOS UN OBJETO CLIENTE
-        	Cliente cliente = new Cliente();
-            // CARGAMOS AL OBJETO 'CLIENTE' LOS VALORES DEL JSP
-            cliente.setDni(request.getParameter("dni"));
-            cliente.setCuil(request.getParameter("cuil"));
-            cliente.setNombre(request.getParameter("nombre"));
-            cliente.setApellido(request.getParameter("apellido"));
-            cliente.setSexo(request.getParameter("sexo"));
-            cliente.setNacionalidad(request.getParameter("nacionalidad"));
-            // CONVERTIMOS DE STRING A LOCALDATE
-            cliente.setFechaNacimiento(LocalDate.parse(request.getParameter("fechaNacimiento")));
-            cliente.setDireccion(request.getParameter("direccion"));
-            cliente.setIdProvincia(request.getParameter("provincia"));
-            cliente.setIdLocalidad(request.getParameter("localidad"));
-            cliente.setCorreoElectronico(request.getParameter("email"));
-            cliente.setTelefonos(request.getParameter("telefonos"));
-
-            // CARGAMOS AL OBJETO 'USUARIO' LOS VALORES DEL JSP
-            Usuario usuario = new Usuario();
-            usuario.setDniUsu(cliente.getDni());
-            usuario.setNombreUsu(request.getParameter("usuario"));
-            usuario.setContraseniaUsu(request.getParameter("password"));
-            usuario.setRolUsu('C');
-
-            // GUARDAMOS LOS REGISTROS EN LA BD
-            boolean exitoCliente = clienteDAO.agregarCliente(cliente);
-            boolean exitoUsuario = false;
-            if (exitoCliente) {
-                exitoUsuario = usuarioNegocio.agregarUsuario(usuario);
-            }
-
-            if (exitoCliente && exitoUsuario) {
-                response.sendRedirect("vistas/AltaCliente.jsp?exito=true");
-            } else {
-                response.sendRedirect("vistas/AltaCliente.jsp?exito=false");
-            }
+       /*  try {
+            List<Prestamo> listaPrestamos = prestamoNegocio.listarPrestamos();
+            request.setAttribute("listaPrestamos", listaPrestamos);                  
+            RequestDispatcher rd = request.getRequestDispatcher("/vistas/ListarPrestamos.jsp");
+            rd.forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("vistas/AltaCliente.jsp?exito=false");
-        }
-    }
+            throw new ServletException("Error al listar prestamos", e);
+        }*/ }
+   
+
+//    // METODO PARA DAR DE ALTA UN CLIENTE
+//    private void altaCliente(HttpServletRequest request, HttpServletResponse response)
+//            throws ServletException, IOException {
+//    	
+//    	// Inicializamos la lista de provincias (por si hay error)
+//        ProvinciaNegocio provinciaNegocio = new ProvinciaNegocioImpl();
+//        List<Provincia> listaProvincias = null;
+//
+//        try {
+//            listaProvincias = provinciaNegocio.listarProvincias();
+//            request.setAttribute("provincias", listaProvincias);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        try {
+//        	
+//        	// OBTENEMOS LAS CONTRASEÑAS DEL FORMULARIO
+//            String password = request.getParameter("password");
+//            String confirmPassword = request.getParameter("confirmPassword");
+//            
+//            // VALIDAMOS QUE LAS CONTRASEÑAS COINCIDAN
+//            clienteNegocio.validarContraseniasIguales(password, confirmPassword);
+//        	// CREAMOS UN OBJETO CLIENTE
+//        	Cliente cliente = new Cliente();
+//            // CARGAMOS AL OBJETO 'CLIENTE' LOS VALORES DEL JSP
+//            cliente.setDni(request.getParameter("dni"));
+//            cliente.setCuil(request.getParameter("cuil"));
+//            cliente.setNombre(request.getParameter("nombre"));
+//            cliente.setApellido(request.getParameter("apellido"));
+//            cliente.setSexo(request.getParameter("sexo"));
+//            cliente.setNacionalidad(request.getParameter("nacionalidad"));
+//            // CONVERTIMOS DE STRING A LOCALDATE
+//            cliente.setFechaNacimiento(LocalDate.parse(request.getParameter("fechaNacimiento")));
+//            cliente.setDireccion(request.getParameter("direccion"));
+//            cliente.setIdProvincia(request.getParameter("provincia"));
+//            cliente.setIdLocalidad(request.getParameter("localidad"));
+//            cliente.setCorreoElectronico(request.getParameter("email"));
+//            cliente.setTelefonos(request.getParameter("telefonos"));
+//
+//            // CARGAMOS AL OBJETO 'USUARIO' LOS VALORES DEL JSP
+//            Usuario usuario = new Usuario();
+//            usuario.setDniUsu(cliente.getDni());
+//            usuario.setNombreUsu(request.getParameter("usuario"));
+//            usuario.setContraseniaUsu(password);
+//            usuario.setRolUsu('C');
+//
+//            // GUARDAMOS LOS REGISTROS EN LA BD
+//            boolean exitoCliente = clienteDAO.agregarCliente(cliente);
+//            boolean exitoUsuario = false;
+//            if (exitoCliente) {
+//                exitoUsuario = usuarioNegocio.agregarUsuario(usuario);
+//            }
+//
+//            if (exitoCliente && exitoUsuario) {
+//                response.sendRedirect("vistas/AltaCliente.jsp?exito=true");
+//            } else {
+//                response.sendRedirect("vistas/AltaCliente.jsp?exito=false");
+//            }
+//        	}catch (ClienteExistenteException | ContraseñaNoCoincideException e) {
+//                request.setAttribute("mensajeError", e.getMessage());
+//                request.getRequestDispatcher("vistas/AltaCliente.jsp").forward(request, response);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                response.sendRedirect("vistas/AltaCliente.jsp?exito=false");
+//            }
+//    }
+    
 
     // METODO PARA HACER BAJA LOGICA DE UN CLIENTE
     private void eliminarCliente(HttpServletRequest request, HttpServletResponse response)
@@ -166,40 +272,68 @@ public class ClienteServlet extends HttpServlet {
         }
     }
     
-    private void modificarCliente(HttpServletRequest request, HttpServletResponse response)
+//    private void modificarCliente(HttpServletRequest request, HttpServletResponse response)
+//            throws ServletException, IOException {
+//        try {
+//            Cliente cliente = new Cliente();
+//            cliente.setDni(request.getParameter("dni"));
+//            cliente.setCuil(request.getParameter("cuil"));
+//            cliente.setNombre(request.getParameter("nombre"));
+//            cliente.setApellido(request.getParameter("apellido"));
+//            cliente.setSexo(request.getParameter("sexo"));
+//            cliente.setNacionalidad(request.getParameter("nacionalidad"));
+//            cliente.setFechaNacimiento(LocalDate.parse(request.getParameter("fechaNacimiento")));
+//            cliente.setDireccion(request.getParameter("direccion"));
+//            cliente.setIdProvincia(request.getParameter("provincia"));
+//            cliente.setIdLocalidad(request.getParameter("localidad"));
+//            cliente.setCorreoElectronico(request.getParameter("email"));
+//            cliente.setTelefonos(request.getParameter("telefonos"));
+//            cliente.setEstado(true);
+//
+//            boolean exitoCliente = clienteNegocio.modificarCliente(cliente);
+//
+//            String nuevaPassword = request.getParameter("password");
+//            boolean exitoUsuario = true;
+//            if (nuevaPassword != null && !nuevaPassword.isEmpty()) {
+//                exitoUsuario = usuarioNegocio.actualizarPassword(cliente.getDni(), nuevaPassword);
+//            }
+//
+//            if (exitoCliente && exitoUsuario) {
+//                response.sendRedirect("ClienteServlet?accion=listar&modificado=true");
+//            } else {
+//                response.sendRedirect("ClienteServlet?accion=listar&modificado=false");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            response.sendRedirect("ClienteServlet?accion=listar&modificado=false");
+//        }
+//    }
+    
+    // METODO PARA OBTENER LOS DATOS DEL CLIENTE DEL JSP
+    private Cliente obtenerClienteDesdeJSP(HttpServletRequest request) {
+        Cliente cliente = new Cliente();
+        cliente.setDni(request.getParameter("dni"));
+        cliente.setCuil(request.getParameter("cuil"));
+        cliente.setNombre(request.getParameter("nombre"));
+        cliente.setApellido(request.getParameter("apellido"));
+        cliente.setSexo(request.getParameter("sexo"));
+        cliente.setNacionalidad(request.getParameter("nacionalidad"));
+        cliente.setFechaNacimiento(LocalDate.parse(request.getParameter("fechaNacimiento")));
+        cliente.setDireccion(request.getParameter("direccion"));
+        cliente.setIdProvincia(request.getParameter("provincia"));
+        cliente.setIdLocalidad(request.getParameter("localidad"));
+        cliente.setCorreoElectronico(request.getParameter("email"));
+        cliente.setTelefonos(request.getParameter("telefonos"));
+        cliente.setNombreUsuario(request.getParameter("usuario"));
+        cliente.setContraseniaUsuario(request.getParameter("password"));
+        return cliente;
+    }
+    
+    private void autorizarPrestamo(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            Cliente cliente = new Cliente();
-            cliente.setDni(request.getParameter("dni"));
-            cliente.setCuil(request.getParameter("cuil"));
-            cliente.setNombre(request.getParameter("nombre"));
-            cliente.setApellido(request.getParameter("apellido"));
-            cliente.setSexo(request.getParameter("sexo"));
-            cliente.setNacionalidad(request.getParameter("nacionalidad"));
-            cliente.setFechaNacimiento(LocalDate.parse(request.getParameter("fechaNacimiento")));
-            cliente.setDireccion(request.getParameter("direccion"));
-            cliente.setIdProvincia(request.getParameter("provincia"));
-            cliente.setIdLocalidad(request.getParameter("localidad"));
-            cliente.setCorreoElectronico(request.getParameter("email"));
-            cliente.setTelefonos(request.getParameter("telefonos"));
-            cliente.setEstado(true);
-
-            boolean exitoCliente = clienteNegocio.modificarCliente(cliente);
-
-            String nuevaPassword = request.getParameter("password");
-            boolean exitoUsuario = true;
-            if (nuevaPassword != null && !nuevaPassword.isEmpty()) {
-                exitoUsuario = usuarioNegocio.actualizarPassword(cliente.getDni(), nuevaPassword);
-            }
-
-            if (exitoCliente && exitoUsuario) {
-                response.sendRedirect("ClienteServlet?accion=listar&modificado=true");
-            } else {
-                response.sendRedirect("ClienteServlet?accion=listar&modificado=false");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect("ClienteServlet?accion=listar&modificado=false");
-        }
+    
+    }
+    private void rechazaPrestamo(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
     }
 }
