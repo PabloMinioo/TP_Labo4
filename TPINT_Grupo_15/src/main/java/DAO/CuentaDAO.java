@@ -2,7 +2,9 @@ package DAO;
 
 import entidad.Cliente;
 import entidad.Cuenta;
+import entidad.TipoCuenta;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -27,4 +29,8 @@ public interface CuentaDAO {
 //    List<Cuenta> obtenerPorTipoCuenta(int tipoCuenta);
     int contarCuentasPorCliente(String clienteDNI);///judi 
       boolean existeDNI(String dni) throws SQLException;///judi
+      List<TipoCuenta> obtenerTiposCuenta();
+      
+      BigDecimal obtenerSaldo(int nroCuenta) throws Exception;
+      boolean debitarMonto(int nroCuenta, BigDecimal monto) throws Exception;
 }

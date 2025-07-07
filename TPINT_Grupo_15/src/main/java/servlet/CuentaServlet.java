@@ -15,8 +15,10 @@ import javax.servlet.http.HttpSession;
 
 import DAO.CuentaDAO;
 import DAOimpl.CuentaDAOImpl;
+import Excepciones.CampoInvalidoException;
 import entidad.Cliente;
 import entidad.Cuenta;
+import entidad.TipoCuenta;
 import negocio.CuentaNegocio;
 import negocioImpl.CuentaNegocioImpl;
 
@@ -71,7 +73,12 @@ public class CuentaServlet extends HttpServlet {
 		switch (action) {
 		// DAR DE ALTA UNA CUENTA
 		case "alta":
-			altaCuenta(request, response);
+			try {
+				altaCuenta(request, response);
+			} catch (ServletException | IOException | CampoInvalidoException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			break;
 		// ELIMINAR UNA CUENTA
 		case "eliminar":
@@ -97,7 +104,11 @@ public class CuentaServlet extends HttpServlet {
 			throws ServletException, IOException {
 		try {
 			List<Cuenta> listaCuentas = cuentaNegocio.listarCuentas();
+			List<TipoCuenta> listaTiposCuenta = cuentaNegocio.listarTiposCuenta();
+			System.out.println("Tipos de cuenta cargados: " + listaTiposCuenta.size());
 			request.setAttribute("listaCuentas", listaCuentas);
+			request.setAttribute("listaTiposCuenta", listaTiposCuenta);
+			
 			RequestDispatcher dispatcher = request.getRequestDispatcher("/vistas/ListarCuentas.jsp");
 			dispatcher.forward(request, response);
 
@@ -108,7 +119,7 @@ public class CuentaServlet extends HttpServlet {
 
 	// METODO PARA DAR DE ALTA UNA CUENTA
 	private void altaCuenta(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws ServletException, IOException, CampoInvalidoException {
 		// OBTENEMOS LOS VALORES DEL JSP
 		String dni = request.getParameter("cliente");
 		String fechaStr = request.getParameter("fechaCreacion");
@@ -116,6 +127,9 @@ public class CuentaServlet extends HttpServlet {
 		int tipoCuenta = Integer.parseInt(tipoCuentaStr);
 		double saldo = 10000.00;
 		LocalDate fechaCreacion = LocalDate.parse(fechaStr);
+        if (fechaCreacion.isAfter(LocalDate.now())) {
+            throw new CampoInvalidoException("La fecha de creación no puede ser posterior a la actual.");
+        }
 		// CREAMOS UN OBJETO CUENTA
 		Cuenta cuenta = new Cuenta();
 		// CARGAMOS AL OBJETO 'CUENTA' LOS VALORES DEL JSP
@@ -143,8 +157,12 @@ public class CuentaServlet extends HttpServlet {
 			throws ServletException, IOException {
 		try {
 			Cuenta cuenta = new Cuenta();
+			String fechaStr = request.getParameter("fechaCreacion");
 			String numeroCuentaStr = request.getParameter("numeroCuenta");
-			System.out.println("Modificar Cuenta: numeroCuenta=" + numeroCuentaStr);
+			LocalDate fechaCreacion = LocalDate.parse(fechaStr);
+	        if (fechaCreacion.isAfter(LocalDate.now())) {
+	            throw new CampoInvalidoException("La fecha de creación no puede ser posterior a la actual.");
+	        }
 			cuenta.setNumeroCuenta(Integer.parseInt(request.getParameter("numeroCuenta")));
 			cuenta.setFechaCreacion(LocalDate.parse(request.getParameter("fechaCreacion")));
 			cuenta.setTipoCuenta(Integer.parseInt(request.getParameter("tipoCuenta")));

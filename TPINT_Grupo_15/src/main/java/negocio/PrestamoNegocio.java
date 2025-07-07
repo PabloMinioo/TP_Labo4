@@ -1,7 +1,9 @@
 package negocio;
 
+import java.math.BigDecimal;
 import java.util.List;
 
+import Excepciones.SaldoInsuficienteException;
 import entidad.Cliente;
 import entidad.Cuota;
 import entidad.Prestamo;
@@ -12,4 +14,5 @@ public interface PrestamoNegocio {
 	 List<Cuota> listarPagarPrestamos() throws Exception;//me lista los pretsamos ocn estado D de debe pagar
 	 boolean  cambiarEstadoR(int idPrestamo) throws Exception;
 	 boolean cambiarEstadoP(int idPrestamo) throws Exception;
+	 boolean pagarCuota(int idPrestamo, int nroCuota, int nroCuenta) throws Exception, SaldoInsuficienteException;
 }

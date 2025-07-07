@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8"%>
 	<%@ page import="java.util.List"%>
 	<%@ page import="entidad.Cuenta"%>
+	<%@ page import="entidad.TipoCuenta"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -132,7 +133,7 @@ tr:hover {
 				<!-- OBTENEMOS LAS CUENTAS Y LAS LISTAMOS -->
 				<%
 				String editarCuenta=(String) request.getAttribute("editarCuenta");
-				
+				List<TipoCuenta> listaTiposCuenta = (List<TipoCuenta>) request.getAttribute("listaTiposCuenta");
 				List<Cuenta> listaCuentas = (List<Cuenta>) request.getAttribute("listaCuentas");
 				if (listaCuentas != null ) {
 					for (Cuenta cu : listaCuentas) {
@@ -155,11 +156,19 @@ tr:hover {
 						<td>	<input type="date" name="fechaCreacion" value="<%=cu.getFechaCreacion() %>"></td>	<!-- FECHA editable -->	
 						  
 						<!-- tipo-->
-					<td> <select name="tipoCuenta">
-					       <option value="2" <%= cu.getTipoCuenta()==2?"selected":"" %>>Caja de ahorro</option>
-					       <option value="1" <%= cu.getTipoCuenta()==1?"selected":"" %>>Cuenta corriente</option>
-				  		  </select>
-				  		  </td>
+					<td>
+					<select name="tipoCuenta">
+					    <%
+					    for (TipoCuenta tipo : listaTiposCuenta) {
+					        boolean selected = (cu.getTipoCuenta() == tipo.getIdTipoCuenta());
+					    %>
+					        <option value="<%= tipo.getIdTipoCuenta() %>" <%= selected ? "selected" : "" %>><%= tipo.getNombreTipo() %></option>
+					    <%
+					    }
+					    %>
+					</select>
+					</td>
+
 				  		  
 				  		  <td><%=cu.getCbu() %></td>
 					<td><%=cu.getSaldo() %></td>

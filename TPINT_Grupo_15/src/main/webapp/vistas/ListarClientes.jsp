@@ -2,16 +2,21 @@
 	pageEncoding="UTF-8"%>
 <%@ page import="java.util.List"%>
 <%@ page import="entidad.Cliente"%>
+<%@ page import="entidad.Provincia"%>
+<%@ page import="entidad.Localidad"%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Listado de Clientes</title>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" charset="utf8"
+	src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
 <script type="text/javascript">
-	$(document).ready(function(){
+	$(document).ready(function() {
 		$('#listadoClientes').DataTable();
 	});
 </script>
@@ -115,7 +120,10 @@ tr:hover {
 			<a href="<%=request.getContextPath()%>/CargarProvincias">Nuevo
 				Cliente</a>
 		</div>
-
+				<% String error = (String) request.getAttribute("errorMensaje"); %>
+		<% if (error != null) { %>
+		    <div style="color: red; font-weight: bold; margin-bottom: 10px;"><%= error %></div>
+		<% } %>
 		<table id="listadoClientes" class="display">
 			<thead>
 				<tr>
@@ -127,8 +135,8 @@ tr:hover {
 					<th>Nacionalidad</th>
 					<th>Fecha de Nacimiento</th>
 					<th>Dirección</th>
-					<th>Id Localidad</th>
-					<th>Id Provincia</th>
+					<th>Provincia</th>
+					<th>Localidad</th>
 					<th>Correo Electrónico</th>
 					<th>Teléfonos</th>
 					<th>Usuario</th>
@@ -142,6 +150,8 @@ tr:hover {
 				<%
 				String editarDni = (String) request.getAttribute("editarDni");
 				List<Cliente> listaClientes = (List<Cliente>) request.getAttribute("listaClientes");
+				List<Provincia> provincias = (List<Provincia>) request.getAttribute("provincias");
+				List<Localidad> localidades = (List<Localidad>) request.getAttribute("localidades");
 				if (listaClientes != null) {
 					for (Cliente cli : listaClientes) {
 						boolean enEdicion = editarDni != null && editarDni.equals(cli.getDni());
@@ -167,16 +177,36 @@ tr:hover {
 							value="<%=cli.getFechaNacimiento()%>"></td>
 						<td><input type="text" name="direccion"
 							value="<%=cli.getDireccion()%>"></td>
-						<td><input type="text" name="localidad"
-							value="<%=cli.getIdLocalidad()%>"></td>
-						<td><input type="text" name="provincia"
-							value="<%=cli.getIdProvincia()%>"></td>
+						<td><select name="provincia" id="provincia_<%=cli.getDni()%>"
+							onchange="actualizarLocalidades('<%=cli.getDni()%>')">
+								<%
+								for (Provincia prov : provincias) {
+									String selected = cli.getIdProvincia().equals(prov.getId()) ? "selected" : "";
+								%>
+								<option value="<%=prov.getId()%>" <%=selected%>><%=prov.getDescripcion()%></option>
+								<%
+								}
+								%>
+						</select></td>
+						<td><select name="localidad" id="localidad_<%=cli.getDni()%>">
+								<%
+								for (Localidad loc : localidades) {
+									if (loc.getIdProvincia_Loc().equals(cli.getIdProvincia())) {
+										String selected = cli.getIdLocalidad().equals(loc.getIdLocalidad_Loc()) ? "selected" : "";
+								%>
+								<option value="<%=loc.getIdLocalidad_Loc()%>" <%=selected%>><%=loc.getDescripcion_Loc()%></option>
+								<%
+								}
+								}
+								%>
+						</select></td>
 						<td><input type="email" name="email"
 							value="<%=cli.getCorreoElectronico()%>"></td>
 						<td><input type="text" name="telefonos"
 							value="<%=cli.getTelefonos()%>"></td>
 						<td><%=cli.getNombreUsuario()%></td>
-						<td><input type="text" name="password" value="<%=cli.getContraseniaUsuario()%>"></td>
+						<td><input type="text" name="password"
+							value="<%=cli.getContraseniaUsuario()%>"></td>
 						<td>
 							<button type="submit" class="btn-accion btn-modificar">Guardar</button>
 							<a href="ClienteServlet?accion=listar"
@@ -195,10 +225,8 @@ tr:hover {
 					<td><%=cli.getNacionalidad()%></td>
 					<td><%=cli.getFechaNacimiento()%></td>
 					<td><%=cli.getDireccion()%></td>
-					<td><%=cli.getDescripcionLocalidad()%></td>
 					<td><%=cli.getDescripcionProvincia()%></td>
-<%-- 					<td><%=cli.getIdLocalidad()%></td> --%>
-<%-- 					<td><%=cli.getIdProvincia()%></td> --%>
+					<td><%=cli.getDescripcionLocalidad()%></td>
 					<td><%=cli.getCorreoElectronico()%></td>
 					<td><%=cli.getTelefonos()%></td>
 					<td><%=cli.getNombreUsuario()%></td>
@@ -229,5 +257,41 @@ tr:hover {
 			</tbody>
 		</table>
 	</div>
+<script>
+    // Estructura: { idProvincia: [ { id, nombre }, ... ] }
+    var localidadesPorProvincia = {};
+
+    <% 
+    List<entidad.Localidad> todasLasLocs = (List<entidad.Localidad>) request.getAttribute("localidades");
+    for (entidad.Localidad loc : todasLasLocs) {
+    %>
+        if (!localidadesPorProvincia['<%=loc.getIdProvincia_Loc()%>']) {
+            localidadesPorProvincia['<%=loc.getIdProvincia_Loc()%>'] = [];
+        }
+        localidadesPorProvincia['<%=loc.getIdProvincia_Loc()%>'].push({
+            id: '<%=loc.getIdLocalidad_Loc()%>',
+            nombre: '<%=loc.getDescripcion_Loc()%>'
+        });
+    <% } %>
+</script>
+	<script>
+		function actualizarLocalidades(dni) {
+			var provinciaSelect = document.getElementById("provincia_" + dni);
+			var localidadSelect = document.getElementById("localidad_" + dni);
+			var idProvincia = provinciaSelect.value;
+
+			var localidades = localidadesPorProvincia[idProvincia] || [];
+
+			// Limpiar el combo de localidades
+			localidadSelect.innerHTML = "";
+
+			localidades.forEach(function(loc) {
+				var option = document.createElement("option");
+				option.value = loc.id;
+				option.text = loc.nombre;
+				localidadSelect.appendChild(option);
+			});
+		}
+	</script>
 </body>
 </html>

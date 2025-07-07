@@ -1,6 +1,7 @@
 package negocio;
 
 import entidad.Cuenta;
+import entidad.TipoCuenta;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -14,4 +15,5 @@ public interface CuentaNegocio {
 	List<Cuenta> listarCuentas() throws Exception;/// uso celi
 	
 	List<Cuenta>CargarDDlCuentas(String dni) throws Exception;//solicitar prestamo -altaPrestamo
+	List<TipoCuenta> listarTiposCuenta();
 }
