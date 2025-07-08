@@ -1,5 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+	
+<%@ page import="java.util.List" %>
+<%@ page import="entidad.Movimiento" %>
+<%@ page import="entidad.Cuenta" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -181,54 +186,58 @@ input[type="date"] {
 	<div class="listado-wrapper">
 		<div class="contenedor-flex">
 
-
 			<div class="columna-izquierda">
 
 <!-- 				<h2>Bienvenido Cliente</h2> -->
 
 				<div class="acciones">
-					<form>
+					<form action="UsuarioClienteServlet" method="post">
+						<input type="hidden" name="accion" value="verMovimientos">
 						<fieldset style="width: 300px; padding: 10px;">
 							<legend>
 								<strong>Seleccione Número de Cuenta:</strong>
 							</legend>
 							<select name="cbu" id="cbu" required>
-								<option value="">-- Seleccione una cuenta --</option>
-								<option value="42623741521">42623741521</option>
-								<option value="120584923">120584923</option>
-								<option value="82719302">82719302</option>
-							</select>
+    <option value="">-- Seleccione una cuenta --</option>
+    <%
+    List<entidad.Cuenta> cuentas = (List<entidad.Cuenta>) session.getAttribute("listaCuentas");
+        if (cuentas != null) {
+            for (entidad.Cuenta c : cuentas) {
+    %>
+        <option value="<%= c.getNumeroCuenta() %>"><%= c.getNumeroCuenta() %> - <%= c.getNombreTipoCuenta() %></option>
+    <%
+            }
+        }
+    %>
+</select>
 						</fieldset>
 						<div class="saldo-box">
 							<fieldset style="width: 300px; padding: 10px;">
-
 								<legend>Saldo</legend>
-								<label><strong>$</strong></label> <label><strong>100000 ponele</strong></label>
+								<label><strong>$</strong></label>
+								<label><strong>100000 ponele</strong></label>
 							</fieldset>
+						</div>
+
+						<div class="botones-mov">
+							<input type="submit" value="Todos los movimientos">
 						</div>
 					</form>
 				</div>
 
-
-				<div class="botones-mov">
-					<input type="submit" value="Todos los movimientos">
-
-
-				</div>
 				<div class="fechas-rango">
 					<div>
-						<label for="fecha_desde">Desde:</label> <input type="date"
-							id="fecha_desde" name="fecha_desde">
+						<label for="fecha_desde">Desde:</label>
+						<input type="date" id="fecha_desde" name="fecha_desde">
 					</div>
 
 					<div>
-						<label for="fecha_hasta">Hasta:</label> <input type="date"
-							id="fecha_hasta" name="fecha_hasta">
+						<label for="fecha_hasta">Hasta:</label>
+						<input type="date" id="fecha_hasta" name="fecha_hasta">
 					</div>
 
 					<input type="submit" value="Ver">
 				</div>
-
 
 				<h3>Historial de movimientos realizados en cuenta seleccionada:</h3>
 
@@ -244,59 +253,52 @@ input[type="date"] {
 							</tr>
 						</thead>
 						<tbody>
+							<%
+								List<entidad.Movimiento> lista = (List<entidad.Movimiento>) request.getAttribute("listaMovimientos");
+								if (lista != null) {
+									for (entidad.Movimiento m : lista) {
+							%>
 							<tr>
-								<td>001</td>
-								<td>315‑629344/1</td>
-								<td>001‑000001/0</td>
-								<td>$5 000</td>
-								<td>2025‑06‑01</td>
+								<td><%= m.getIDMovimiento() %></td>
+								<td><%= m.getNumeroCuenta() %></td>
+								<td><%= m.getCuentaDestino() %></td>
+								<td>$<%= m.getImporte() %></td>
+								<td><%= m.getFecha() %></td>
 							</tr>
-							<tr>
-								<td>002</td>
-								<td>315‑629344/1</td>
-								<td>214‑789654/2</td>
-								<td>$7 200</td>
-								<td>2025‑06‑03</td>
-							</tr>
-							<tr>
-								<td>003</td>
-								<td>214‑789654/2</td>
-								<td>314‑629309/1</td>
-								<td>$2 500</td>
-								<td>2025‑06‑05</td>
-							</tr>
+							<%
+									}
+								}
+							%>
 						</tbody>
 					</table>
 				</div>
 
 			</div>
 
-
 			<div class="columna-derecha">
 
+				<input type="submit" value="Transferencias">
 
-				<input type="submit" value="Transferencias"> 
-				
 				<form action="${pageContext.request.contextPath}/UsuarioClienteServlet" method="get">
-    			<input type="hidden" name="accion" value="solicitarPrestamo">
-				<input	type="submit" value="Solicitud Prestamo"> 
+					<input type="hidden" name="accion" value="solicitarPrestamo">
+					<input type="submit" value="Solicitud Prestamo">
 				</form>
-				
+
 				<form action="${pageContext.request.contextPath}/UsuarioClienteServlet" method="post">
-				<input type="hidden" name="accion" value="listarPagarPrestamo">
-				<input type="submit" value="Pagar Préstamo"> 
-					</form>
-					
-				<form action="${pageContext.request.contextPath}/UsuarioClienteServlet" method="post">
-    			<input type="hidden" name="accion" value="verInformacionPersonal" />
-    			<input type="submit" value="Datos Personales" />
+					<input type="hidden" name="accion" value="listarPagarPrestamo">
+					<input type="submit" value="Pagar Préstamo">
+				</form>
+
+				<form action="${pageContext.request.contextPath}/UsuarioClienteServlet" method="get">
+					<input type="hidden" name="accion" value="verInformacionPersonal" />
+					<input type="submit" value="Datos Personales" />
 				</form>
 			</div>
 
 		</div>
 	</div>
 
-
 </body>
 </html>
+
 

@@ -130,6 +130,8 @@ public class CuentaDAOImpl implements CuentaDAO {
 		}
 		return lista;
 	}
+	
+	
 
 	public List<TipoCuenta> obtenerTiposCuenta() {
 		List<TipoCuenta> tipos = new ArrayList<>();

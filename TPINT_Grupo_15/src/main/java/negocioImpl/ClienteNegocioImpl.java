@@ -118,6 +118,5 @@ public class ClienteNegocioImpl implements ClienteNegocio{
         if (edad < 18) {
             throw new EdadInvalidaException("El cliente debe ser mayor de 18 años.");
         }
-
     }
 }

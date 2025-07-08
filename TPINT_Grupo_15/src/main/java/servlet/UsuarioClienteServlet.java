@@ -17,6 +17,7 @@ import javax.servlet.http.HttpSession;
 import entidad.Cliente;
 import entidad.Cuenta;
 import entidad.Cuota;
+import entidad.Movimiento;
 import entidad.Prestamo;
 import entidad.Provincia;
 import negocio.CuentaNegocio;
@@ -26,6 +27,8 @@ import negocioImpl.PrestamoNegocioImpl;
 import negocio.PrestamoNegocio;
 import negocio.ClienteNegocio;
 import negocioImpl.ClienteNegocioImpl;
+import negocio.MovimientoNegocio;
+import negocioImpl.MovimientoNegocioImpl;
 
 /**
  * Servlet implementation class UsuarioClienteServlet
@@ -36,19 +39,20 @@ public class UsuarioClienteServlet extends HttpServlet {
 
 	private CuentaNegocio cuentaNegocio = new CuentaNegocioImpl();
 	private PrestamoNegocio prestamoNegocio = new PrestamoNegocioImpl();
+	private MovimientoNegocio movimientoNegocio = new MovimientoNegocioImpl();
 
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
 	public UsuarioClienteServlet() {
 		super();
-	    try {
-	        Class.forName("DAOimpl.CuotaDAOImpl");
-	        System.out.println("Clase CuotaDAOImpl encontrada");
-	    } catch (ClassNotFoundException e) {
-	        e.printStackTrace();
-	        System.out.println("Clase CuotaDAOImpl NO encontrada");
-	    }
+		try {
+			Class.forName("DAOimpl.CuotaDAOImpl");
+			System.out.println("Clase CuotaDAOImpl encontrada");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("Clase CuotaDAOImpl NO encontrada");
+		}
 	}
 
 	/**
@@ -111,6 +115,9 @@ public class UsuarioClienteServlet extends HttpServlet {
 		// info personal
 		case "verInformacionPersonal":
 			verInformacionPersonal(request, response);
+			break;
+		case "verMovimientos":
+			verMovimientos(request, response);
 			break;
 		// REDIRIGIR A 'HomeCliente.jsp'
 		default:
@@ -305,6 +312,49 @@ public class UsuarioClienteServlet extends HttpServlet {
 			e.printStackTrace();
 			response.sendRedirect(request.getContextPath() + "/vistas/Error.jsp");
 		}
+	}
+
+	private void verMovimientos(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		HttpSession session = request.getSession(false);
+		String dni = (session != null) ? (String) session.getAttribute("dniUsuario") : null;
+
+		if (dni == null) {
+			response.sendRedirect(request.getContextPath() + "/vistas/Login.jsp");
+			return;
+		}
+
+		List<Cuenta> cuentasCliente = null;
+		try {
+			cuentasCliente = cuentaNegocio.CargarDDlCuentas(dni);
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("error", "Error al cargar cuentas del cliente.");
+		}
+
+		// CAMBIO: Usar session en lugar de request
+		session.setAttribute("listaCuentas", cuentasCliente);
+
+		String cbuStr = request.getParameter("cbu");
+		if (cbuStr == null || cbuStr.isEmpty()) {
+			request.setAttribute("error", "No se seleccionó ninguna cuenta.");
+			request.getRequestDispatcher("/vistas/HomeCliente.jsp").forward(request, response);
+			return;
+		}
+
+		try {
+			int numeroCuenta = Integer.parseInt(cbuStr);
+			List<Movimiento> movimientos = movimientoNegocio.obtenerMovimientosPorCuenta(numeroCuenta);
+			request.setAttribute("listaMovimientos", movimientos);
+
+		} catch (NumberFormatException e) {
+			request.setAttribute("error", "Número de cuenta inválido.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("error", "No se pudieron cargar los movimientos.");
+		}
+
+		request.getRequestDispatcher("/vistas/HomeCliente.jsp").forward(request, response);
 	}
 
 }

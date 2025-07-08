@@ -50,8 +50,7 @@ public class CuentaServlet extends HttpServlet {
 		// MOSTRAR LISTADO DE CUENTAS
 		case "listar":
 			listarCuentas(request, response);
-			break;
-			
+			break;			
 		// EDITAR UN CLIENTE MEDIANTE SU DNI
 		case "modificar":
 			request.setAttribute("editarCuenta", request.getParameter("numeroCuenta"));
@@ -73,12 +72,7 @@ public class CuentaServlet extends HttpServlet {
 		switch (action) {
 		// DAR DE ALTA UNA CUENTA
 		case "alta":
-			try {
-				altaCuenta(request, response);
-			} catch (ServletException | IOException | CampoInvalidoException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			altaCuenta(request, response);
 			break;
 		// ELIMINAR UNA CUENTA
 		case "eliminar":
@@ -95,109 +89,102 @@ public class CuentaServlet extends HttpServlet {
 		}
 	}
 
-	
-	
-	
-	
 	// METODO PARA LISTAR CUENTAS
 	private void listarCuentas(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		try {
-			List<Cuenta> listaCuentas = cuentaNegocio.listarCuentas();
-			List<TipoCuenta> listaTiposCuenta = cuentaNegocio.listarTiposCuenta();
-			System.out.println("Tipos de cuenta cargados: " + listaTiposCuenta.size());
-			request.setAttribute("listaCuentas", listaCuentas);
-			request.setAttribute("listaTiposCuenta", listaTiposCuenta);
-			
-			RequestDispatcher dispatcher = request.getRequestDispatcher("/vistas/ListarCuentas.jsp");
-			dispatcher.forward(request, response);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    try {
+	        List<Cuenta> listaCuentas = cuentaNegocio.listarCuentas();
+	        request.setAttribute("listaCuentas", listaCuentas);
+	        cargarTiposCuenta(request);
+	        request.getRequestDispatcher("/vistas/ListarCuentas.jsp").forward(request, response);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new ServletException("Error al listar cuentas", e);
+	    }
 	}
-
+	
 	// METODO PARA DAR DE ALTA UNA CUENTA
 	private void altaCuenta(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException, CampoInvalidoException {
-		// OBTENEMOS LOS VALORES DEL JSP
-		String dni = request.getParameter("cliente");
-		String fechaStr = request.getParameter("fechaCreacion");
-		String tipoCuentaStr = request.getParameter("tipoCuenta");
-		int tipoCuenta = Integer.parseInt(tipoCuentaStr);
-		double saldo = 10000.00;
-		LocalDate fechaCreacion = LocalDate.parse(fechaStr);
-        if (fechaCreacion.isAfter(LocalDate.now())) {
-            throw new CampoInvalidoException("La fecha de creación no puede ser posterior a la actual.");
-        }
-		// CREAMOS UN OBJETO CUENTA
-		Cuenta cuenta = new Cuenta();
-		// CARGAMOS AL OBJETO 'CUENTA' LOS VALORES DEL JSP
-		cuenta.setClienteDNI(dni);
-		cuenta.setTipoCuenta(tipoCuenta);
-		cuenta.setFechaCreacion(fechaCreacion);
-		cuenta.setSaldo(saldo);
-		CuentaNegocio negocio = new CuentaNegocioImpl();
-		try {
-			boolean ok = negocio.crearCuenta(cuenta);
-			if (ok) {
+	        throws ServletException, IOException {
+	    try {
+	        // OBTENEMOS LOS DATOS DE LA CUENTA DESDE EL JSP PARA VALIDAD DATOS
+	        Cuenta cuenta = obtenerCuentaDesdeJSP(request);
+	        // SETEAMOS EL SALDO EN 10000.00
+	        cuenta.setSaldo(10000.00);
+	        // CREAMOS LA CUENTA
+	        boolean exitoCuenta = cuentaNegocio.crearCuenta(cuenta);
+			if (exitoCuenta) {
 				request.setAttribute("mensaje", "CUENTA CREADA  CON EXITO.");
 				request.getRequestDispatcher("/vistas/AltaCuenta.jsp").forward(request, response);
 			} else {
-				request.setAttribute("mensaje", "El DNI NOO EXISTE COMO CLIENTE O EL CLIENTE YA CUENTA CON 3 CUENTAS.");
+				request.setAttribute("mensaje", "EL DNI NO EXISTE COMO CLIENTE O EL CLIENTE YA CUENTA CON 3 CUENTAS.");
 				request.getRequestDispatcher("/vistas/AltaCuenta.jsp").forward(request, response);
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			response.sendRedirect("error.jsp");
-		}
+	    // EXCEPCIONES
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.sendRedirect("vistas/AltaCuenta.jsp?exito=false");
+	    }
 	}
 
+	// METODO PARA MODIFICAR UNA CUENTA
 	private void modificarCuenta(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		try {
-			Cuenta cuenta = new Cuenta();
-			String fechaStr = request.getParameter("fechaCreacion");
-			String numeroCuentaStr = request.getParameter("numeroCuenta");
-			LocalDate fechaCreacion = LocalDate.parse(fechaStr);
-	        if (fechaCreacion.isAfter(LocalDate.now())) {
-	            throw new CampoInvalidoException("La fecha de creación no puede ser posterior a la actual.");
-	        }
-			cuenta.setNumeroCuenta(Integer.parseInt(request.getParameter("numeroCuenta")));
-			cuenta.setFechaCreacion(LocalDate.parse(request.getParameter("fechaCreacion")));
-			cuenta.setTipoCuenta(Integer.parseInt(request.getParameter("tipoCuenta")));
-			boolean ok = cuentaNegocio.modificarCuenta(cuenta);
-			if (ok) {
+	        throws ServletException, IOException {
+	    try {
+	        // OBTENEMOS LOS DATOS DE LA CUENTA DESDE EL JSP PARA VALIDAD DATOS
+	        Cuenta cuenta = obtenerCuentaDesdeJSP(request);
+	        // MODIFICAMOS LA CUENTA
+	        boolean exitoCuenta = cuentaNegocio.modificarCuenta(cuenta);
+			if (exitoCuenta) {
 				response.sendRedirect("CuentaServlet?accion=listar&modificado=true");
 			} else {
 				response.sendRedirect("CuentaServlet?accion=listar&modificado=false");
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.sendRedirect("CuentaServlet?accion=listar&modificado=false");
-		}
+		// EXCEPCIONES
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.sendRedirect("CuentaServlet?accion=listar&modificado=false");
+	    }
 	}
 
 	// METODO PARA ELIMINAR UNA CUENTA
 	private void eliminarCuenta(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		try {
-			// OBTENEMOS EL NUMERO DE CUENTA
-			int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
-			// REALIZAMOS LA BAJA LOGICA DE LA CUENTA
-			boolean exito = cuentaNegocio.eliminarCuenta(numeroCuenta);
-			if (exito) {
-				response.sendRedirect("CuentaServlet?accion=listar");
-			} else {
-				response.sendRedirect("CuentaServlet?accion=listar&error=true");
-			}
+	        throws ServletException, IOException {
+	    try {
+	    	// OBTENEMOS EL NUMERO DE CUENTA
+	        int numeroCuenta = Integer.parseInt(request.getParameter("numeroCuenta"));
+	        // ELIMINAMOS LA CUENTA
+	        boolean exito = cuentaNegocio.eliminarCuenta(numeroCuenta);
+	        if (exito) {
+	            response.sendRedirect("CuentaServlet?accion=listar");
+	        } else {
+	            response.sendRedirect("CuentaServlet?accion=listar&error=true");
+	        }
+	    // EXCEPCIONES
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.sendRedirect("CuentaServlet?accion=listar&error=true");
+	    }
+	}
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.sendRedirect("CuentaServlet?accion=listar&error=true");
-		}
-
-		listarCuentas(request, response);
+	// METODO PARA OBTENER LOS DATOS DE LAS CUENTAS DEL JSP
+	private Cuenta obtenerCuentaDesdeJSP(HttpServletRequest request) {
+		// CREAMOS UNA CUENTA Y LE SETEAMOS LOS VALORES
+	    Cuenta cuenta = new Cuenta();
+	    cuenta.setNumeroCuenta(Integer.parseInt(request.getParameter("numeroCuenta")));
+	    cuenta.setTipoCuenta(Integer.parseInt(request.getParameter("tipoCuenta")));
+	    cuenta.setFechaCreacion(LocalDate.parse(request.getParameter("fechaCreacion")));
+	    cuenta.setSaldo(Double.parseDouble(request.getParameter("saldo")));
+	    return cuenta;
+	}
+	
+	// METODO PARA CARGAR LOS TIPOS DE CUENTA DESDE LA BD
+	private void cargarTiposCuenta(HttpServletRequest request) {
+	    try {
+	        List<TipoCuenta> listaTiposCuenta = cuentaNegocio.listarTiposCuenta();
+	        request.setAttribute("listaTiposCuenta", listaTiposCuenta);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 	}
 }

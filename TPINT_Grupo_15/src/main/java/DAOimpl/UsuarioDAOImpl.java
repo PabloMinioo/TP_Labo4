@@ -19,10 +19,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
-		
+
 		System.out.println("=== INICIO validarUsuarioLogin ===");
 		System.out.println("Usuario recibido: " + usuario);
 		System.out.println("Contraseña recibida: " + contrasenia);

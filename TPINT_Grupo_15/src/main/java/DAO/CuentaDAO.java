@@ -23,7 +23,7 @@ public interface CuentaDAO {
     //  Operaciones de consultas 
  
  
-//    List<Cuenta> obtenerPorClienteDNI(String clienteDNI);
+       //List<Cuenta> obtenerPorClienteDNI(String clienteDNI);
 //    boolean existeNumeroCuenta(int numeroCuenta);
 //    boolean existeCBU(String cbu);
 //    List<Cuenta> obtenerPorTipoCuenta(int tipoCuenta);
